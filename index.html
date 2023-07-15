@@ -457,6 +457,17 @@
         video.allow = 'autoplay; fullscreen; encrypted-media';
 
         player.appendChild(video);
+
+        // Listen for the "onStateChange" event to autoplay the next video
+        video.addEventListener('onStateChange', event => {
+          if (event.data === 0) {
+            // Video ended, play the next one
+            const mediaList = getMediaByType(type);
+            const nextIndex = (index + 1) % mediaList.length;
+            const nextMedia = mediaList[nextIndex];
+            playMedia(nextMedia, nextIndex, type);
+          }
+        });
       } else if (media.url.endsWith('.m3u8')) {
         // HLS stream
         const video = document.createElement('video');
@@ -474,6 +485,14 @@
         }
 
         player.appendChild(video);
+
+        // Listen for the "ended" event to autoplay the next video
+        video.addEventListener('ended', () => {
+          const mediaList = getMediaByType(type);
+          const nextIndex = (index + 1) % mediaList.length;
+          const nextMedia = mediaList[nextIndex];
+          playMedia(nextMedia, nextIndex, type);
+        });
       } else {
         // Regular video or audio file
         const source = document.createElement('source');
@@ -487,6 +506,14 @@
         video.appendChild(source);
 
         player.appendChild(video);
+
+        // Listen for the "ended" event to autoplay the next video
+        video.addEventListener('ended', () => {
+          const mediaList = getMediaByType(type);
+          const nextIndex = (index + 1) % mediaList.length;
+          const nextMedia = mediaList[nextIndex];
+          playMedia(nextMedia, nextIndex, type);
+        });
       }
 
       const title = document.createElement('p');
