@@ -8,6 +8,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.png" type="image/png">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca&display=swap" rel="stylesheet">
   <meta property="og:title" content="IMP: Internet Media Player">
   <meta property="og:description" content="Watch your favorite internet media.">
   <meta property="og:image" content="icon.png">
@@ -19,7 +20,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Lexend Deca', Arial, sans-serif;
       color: #808080;
       background-color: #080808;
       /* Added background color for the dark theme */
@@ -108,25 +109,34 @@
     }
 
     .add-content-form label {
-      margin-bottom: 5px;
-      font-weight: bold;
+        margin-bottom: 5px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: small;
     }
 
     .add-content-form input[type="text"] {
       margin-bottom: 10px;
-      padding: 5px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #303030;
+      color: #ffffff;
     }
 
     .add-content-form input[type="button"] {
-      background-color: #4caf50;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 14px;
-      cursor: pointer;
+        background-color: #e93f38;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 6px;
+        margin-block-start: 20px;
+        text-transform: uppercase;
     }
 
     /* Message for no content */
@@ -151,6 +161,18 @@
 
     .panel ul li.playing {
       color: #ffffff;
+    }
+
+    h2 {
+        margin-block-start: 0px;
+    }
+
+    select#typeSelect {
+        padding: 10px;
+        border-radius: 6px;
+        background: #303030;
+        border: none;
+        color: #ffffff;
     }
 
     /* Updated CSS rules for the player panel */
@@ -284,7 +306,7 @@
       form.className = 'add-content-form';
 
       const titleLabel = document.createElement('label');
-      titleLabel.textContent = 'Title:';
+      titleLabel.textContent = 'Title';
       const titleInput = document.createElement('input');
       titleInput.type = 'text';
       titleInput.id = 'titleInput';
@@ -292,7 +314,7 @@
       form.appendChild(titleInput);
 
       const urlLabel = document.createElement('label');
-      urlLabel.textContent = 'URL:';
+      urlLabel.textContent = 'URL';
       const urlInput = document.createElement('input');
       urlInput.type = 'text';
       urlInput.id = 'urlInput';
@@ -300,7 +322,7 @@
       form.appendChild(urlInput);
 
       const typeLabel = document.createElement('label');
-      typeLabel.textContent = 'Type:';
+      typeLabel.textContent = 'Type';
       const typeSelect = document.createElement('select');
       typeSelect.id = 'typeSelect';
 
