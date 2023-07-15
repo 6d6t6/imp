@@ -230,279 +230,283 @@
     </div>
   </div>
 
-<!-- Add your JavaScript scripts here -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script>
-  // DOM elements
-  const navigationMenu = document.querySelector('.navigation-menu');
-  const panel = document.querySelector('.panel');
-  const player = document.querySelector('.player');
+  <!-- Add your JavaScript scripts here -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    // DOM elements
+    const navigationMenu = document.querySelector('.navigation-menu');
+    const panel = document.querySelector('.panel');
+    const player = document.querySelector('.player');
 
-  // Selected index for each media type
-  const selectedIndexes = {
-    music: 0,
-    video: 0,
-    radio: 0,
-    tv: 0,
-  };
+    // Selected index for each media type
+    const selectedIndexes = {
+      music: 0,
+      video: 0,
+      radio: 0,
+      tv: 0,
+    };
 
-  // Event listeners
-  navigationMenu.addEventListener('click', handleNavigationMenuClick);
+    // Event listeners
+    navigationMenu.addEventListener('click', handleNavigationMenuClick);
 
-  // Handle navigation menu click
-  function handleNavigationMenuClick(event) {
-    event.preventDefault();
-    const target = event.target.closest('li');
-    if (target) {
-      // Remove active class from all navigation menu items
-      navigationMenu.querySelectorAll('li').forEach(item => {
-        item.classList.remove('active');
-      });
-      // Add active class to the clicked menu item
-      target.classList.add('active');
-      // Display corresponding content in the panel based on the clicked menu item
-      const selectedMenuItem = target.querySelector('a');
-      const selectedType = selectedMenuItem.dataset.type;
-      renderPanelContent(selectedType);
-
-      // Remove the toggle functionality for the panel and player
-      panel.classList.remove('hidden');
-      player.classList.remove('expanded');
-    }
-  }
-
-  // Render content in the panel based on the selected type
-  function renderPanelContent(type) {
-    // Clear previous content
-    panel.innerHTML = '';
-
-    // Set the header
-    const header = document.createElement('h2');
-    header.textContent = capitalizeFirstLetter(type);
-    panel.appendChild(header);
-
-    if (type === 'add') {
-      // Display the add content form
-      renderAddContentForm();
-    } else {
-      // Load and display the media content based on the type
-      const media = getMediaByType(type);
-      if (media.length > 0) {
-        const ul = document.createElement('ul');
-        media.forEach((item, index) => {
-          const li = document.createElement('li');
-          li.textContent = item.title;
-          li.classList.add('list-item');
-          if (index === selectedIndexes[type]) {
-            li.classList.add('playing');
-          }
-          li.addEventListener('click', () => playMedia(item, index, type));
-          ul.appendChild(li);
+    // Handle navigation menu click
+    function handleNavigationMenuClick(event) {
+      event.preventDefault();
+      const target = event.target.closest('li');
+      if (target) {
+        // Remove active class from all navigation menu items
+        navigationMenu.querySelectorAll('li').forEach(item => {
+          item.classList.remove('active');
         });
-        panel.appendChild(ul);
-      } else {
-        const message = document.createElement('p');
-        message.className = 'no-content-message';
-        message.textContent = 'No content available.';
-        panel.appendChild(message);
+        // Add active class to the clicked menu item
+        target.classList.add('active');
+        // Display corresponding content in the panel based on the clicked menu item
+        const selectedMenuItem = target.querySelector('a');
+        const selectedType = selectedMenuItem.dataset.type;
+        renderPanelContent(selectedType);
+
+        // Remove the toggle functionality for the panel and player
+        panel.classList.remove('hidden');
+        player.classList.remove('expanded');
       }
     }
-  }
 
-  // Render the add content form
-  function renderAddContentForm() {
-    const form = document.createElement('form');
-    form.className = 'add-content-form';
+    // Render content in the panel based on the selected type
+    function renderPanelContent(type) {
+      // Clear previous content
+      panel.innerHTML = '';
 
-    const titleLabel = document.createElement('label');
-    titleLabel.textContent = 'Title:';
-    const titleInput = document.createElement('input');
-    titleInput.type = 'text';
-    titleInput.id = 'titleInput';
-    form.appendChild(titleLabel);
-    form.appendChild(titleInput);
+      // Set the header
+      const header = document.createElement('h2');
+      header.textContent = capitalizeFirstLetter(type);
+      panel.appendChild(header);
 
-    const urlLabel = document.createElement('label');
-    urlLabel.textContent = 'URL:';
-    const urlInput = document.createElement('input');
-    urlInput.type = 'text';
-    urlInput.id = 'urlInput';
-    form.appendChild(urlLabel);
-    form.appendChild(urlInput);
+      if (type === 'add') {
+        // Display the add content form
+        renderAddContentForm();
+      } else {
+        // Load and display the media content based on the type
+        const media = getMediaByType(type);
+        if (media.length > 0) {
+          const ul = document.createElement('ul');
+          media.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.textContent = item.title;
+            li.classList.add('list-item');
+            if (index === selectedIndexes[type]) {
+              li.classList.add('playing');
+            }
+            li.addEventListener('click', () => playMedia(item, index, type));
+            ul.appendChild(li);
+          });
+          panel.appendChild(ul);
+        } else {
+          const message = document.createElement('p');
+          message.className = 'no-content-message';
+          message.textContent = 'No content available.';
+          panel.appendChild(message);
+        }
+      }
+    }
 
-    const typeLabel = document.createElement('label');
-    typeLabel.textContent = 'Type:';
-    const typeSelect = document.createElement('select');
-    typeSelect.id = 'typeSelect';
+    // Render the add content form
+    function renderAddContentForm() {
+      const form = document.createElement('form');
+      form.className = 'add-content-form';
 
-    const musicOption = document.createElement('option');
-    musicOption.value = 'music';
-    musicOption.textContent = 'Song';
-    typeSelect.appendChild(musicOption);
+      const titleLabel = document.createElement('label');
+      titleLabel.textContent = 'Title:';
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.id = 'titleInput';
+      form.appendChild(titleLabel);
+      form.appendChild(titleInput);
 
-    const videoOption = document.createElement('option');
-    videoOption.value = 'video';
-    videoOption.textContent = 'Video';
-    typeSelect.appendChild(videoOption);
+      const urlLabel = document.createElement('label');
+      urlLabel.textContent = 'URL:';
+      const urlInput = document.createElement('input');
+      urlInput.type = 'text';
+      urlInput.id = 'urlInput';
+      form.appendChild(urlLabel);
+      form.appendChild(urlInput);
 
-    const radioOption = document.createElement('option');
-    radioOption.value = 'radio';
-    radioOption.textContent = 'Radio Station';
-    typeSelect.appendChild(radioOption);
+      const typeLabel = document.createElement('label');
+      typeLabel.textContent = 'Type:';
+      const typeSelect = document.createElement('select');
+      typeSelect.id = 'typeSelect';
 
-    const tvOption = document.createElement('option');
-    tvOption.value = 'tv';
-    tvOption.textContent = 'TV Channel';
-    typeSelect.appendChild(tvOption);
+      const musicOption = document.createElement('option');
+      musicOption.value = 'music';
+      musicOption.textContent = 'Song';
+      typeSelect.appendChild(musicOption);
 
-    form.appendChild(typeLabel);
-    form.appendChild(typeSelect);
+      const videoOption = document.createElement('option');
+      videoOption.value = 'video';
+      videoOption.textContent = 'Video';
+      typeSelect.appendChild(videoOption);
 
-    const addButton = document.createElement('input');
-    addButton.type = 'button';
-    addButton.value = 'Save';
-    addButton.addEventListener('click', handleAddContentClick);
-    form.appendChild(addButton);
+      const radioOption = document.createElement('option');
+      radioOption.value = 'radio';
+      radioOption.textContent = 'Radio Station';
+      typeSelect.appendChild(radioOption);
 
-    panel.appendChild(form);
-  }
+      const tvOption = document.createElement('option');
+      tvOption.value = 'tv';
+      tvOption.textContent = 'TV Channel';
+      typeSelect.appendChild(tvOption);
 
-  // Get the media items based on the type
-  function getMediaByType(type) {
-    // Retrieve media list from local storage based on the type
-    const mediaList = localStorage.getItem(type);
-    return mediaList ? JSON.parse(mediaList) : [];
-  }
+      form.appendChild(typeLabel);
+      form.appendChild(typeSelect);
 
-  // Save the media list to local storage
-  function saveMediaByType(type, mediaList) {
-    localStorage.setItem(type, JSON.stringify(mediaList));
-  }
+      const addButton = document.createElement('input');
+      addButton.type = 'button';
+      addButton.value = 'Save';
+      addButton.addEventListener('click', handleAddContentClick);
+      form.appendChild(addButton);
 
-  // Capitalize the first letter of a string
-  function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+      panel.appendChild(form);
+    }
 
-  // Trigger a click event on the Add menu item to select it by default
-  const addMenuItem = document.querySelector('a[data-type="add"]');
-  if (addMenuItem) {
-    addMenuItem.click();
-  }
+    // Get the media items based on the type
+    function getMediaByType(type) {
+      // Retrieve media list from local storage based on the type
+      const mediaList = localStorage.getItem(type);
+      return mediaList ? JSON.parse(mediaList) : [];
+    }
 
-  // Handle add content button click
-  function handleAddContentClick() {
-    const titleInput = document.getElementById('titleInput');
-    const urlInput = document.getElementById('urlInput');
-    const typeSelect = document.getElementById('typeSelect');
+    // Save the media list to local storage
+    function saveMediaByType(type, mediaList) {
+      localStorage.setItem(type, JSON.stringify(mediaList));
+    }
 
-    const title = titleInput.value.trim();
-    let url = urlInput.value.trim();
-    const type = typeSelect.value;
+    // Capitalize the first letter of a string
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 
-    if (title !== '' && url !== '') {
-      // Convert YouTube video URL format
-      if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        url = convertYouTubeUrl(url);
+    // Trigger a click event on the Add menu item to select it by default
+    const addMenuItem = document.querySelector('a[data-type="add"]');
+    if (addMenuItem) {
+      addMenuItem.click();
+    }
+
+    // Handle add content button click
+    function handleAddContentClick() {
+      const titleInput = document.getElementById('titleInput');
+      const urlInput = document.getElementById('urlInput');
+      const typeSelect = document.getElementById('typeSelect');
+
+      const title = titleInput.value.trim();
+      let url = urlInput.value.trim();
+      const type = typeSelect.value;
+
+      if (title !== '' && url !== '') {
+        // Convert YouTube video URL format
+        if (url.includes('youtube.com') || url.includes('youtu.be')) {
+          url = convertYouTubeUrl(url);
+        }
+
+        const mediaItem = {
+          title: title,
+          url: url,
+        };
+
+        const mediaList = getMediaByType(type);
+        mediaList.push(mediaItem);
+        saveMediaByType(type, mediaList);
+
+        titleInput.value = '';
+        urlInput.value = '';
+
+        renderPanelContent(type);
+
+        // Update active state of the section icon
+        const navigationItems = navigationMenu.querySelectorAll('li');
+        navigationItems.forEach(item => {
+          item.classList.remove('active');
+        });
+
+        const selectedMenuItem = navigationMenu.querySelector(`[data-type="${type}"]`);
+        selectedMenuItem.closest('li').classList.add('active');
+      }
+    }
+
+    // Function to convert YouTube video URL format
+    function convertYouTubeUrl(url) {
+      if (url.includes('youtu.be')) {
+        // Extract the video ID from the share URL
+        const videoId = url.split('/').pop();
+        return `https://www.youtube.com/embed/${videoId}`;
+      } else {
+        const urlObj = new URL(url);
+        const videoId = urlObj.searchParams.get('v');
+        return `https://www.youtube.com/embed/${videoId}`;
+      }
+    }
+
+    // Play the selected media
+    function playMedia(media, index, type) {
+      player.innerHTML = ''; // Clear previous media
+
+      if (media.url.includes('youtube.com') || media.url.includes('youtu.be')) {
+        const video = document.createElement('iframe');
+        video.width = '100%';
+        video.height = '100%';
+        video.src = `${media.url}?autoplay=1`;
+        video.frameborder = '0';
+        video.allow = 'autoplay; fullscreen; encrypted-media';
+
+        player.appendChild(video);
+      } else if (media.url.endsWith('.m3u8')) {
+        // HLS stream
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        video.style.maxWidth = '100%';
+        video.style.maxHeight = '100%';
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(media.url);
+          hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = media.url;
+        }
+
+        player.appendChild(video);
+      } else {
+        // Regular video or audio file
+        const source = document.createElement('source');
+        source.src = media.url;
+
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        video.style.maxWidth = '100%';
+        video.style.maxHeight = '100%';
+        video.appendChild(source);
+
+        player.appendChild(video);
       }
 
-      const mediaItem = {
-        title: title,
-        url: url,
-      };
+      const title = document.createElement('p');
+      title.textContent = `Now Playing: ${media.title}`;
+      player.appendChild(title);
 
-      const mediaList = getMediaByType(type);
-      mediaList.push(mediaItem);
-      saveMediaByType(type, mediaList);
+      // Update the selected index for the current media type
+      selectedIndexes[type] = index;
 
-      titleInput.value = '';
-      urlInput.value = '';
-
-      renderPanelContent(type);
-
-      // Update active state of the section icon
-      const navigationItems = navigationMenu.querySelectorAll('li');
-      navigationItems.forEach(item => {
-        item.classList.remove('active');
+      // Set the active playing item and update the UI
+      const listItems = panel.querySelectorAll('.list-item');
+      listItems.forEach((item, idx) => {
+        if (idx === index) {
+          item.classList.add('playing');
+        } else {
+          item.classList.remove('playing');
+        }
       });
-
-      const selectedMenuItem = navigationMenu.querySelector(`[data-type="${type}"]`);
-      selectedMenuItem.closest('li').classList.add('active');
     }
-  }
-
-  // Function to convert YouTube video URL format
-  function convertYouTubeUrl(url) {
-    const urlObj = new URL(url);
-    const videoId = urlObj.searchParams.get('v');
-    return `https://www.youtube.com/embed/${videoId}`;
-  }
-
-  // Play the selected media
-  function playMedia(media, index, type) {
-    player.innerHTML = ''; // Clear previous media
-
-    if (media.url.includes('youtube.com') || media.url.includes('youtu.be')) {
-      // YouTube video
-      const video = document.createElement('iframe');
-      video.width = '100%';
-      video.height = '100%';
-      video.src = media.url;
-      video.frameborder = '0';
-      video.allow = 'autoplay; encrypted-media';
-      video.allowfullscreen = true;
-
-      player.appendChild(video);
-    } else if (media.url.endsWith('.m3u8')) {
-      // HLS stream
-      const video = document.createElement('video');
-      video.controls = true;
-      video.autoplay = true;
-      video.style.maxWidth = '100%';
-      video.style.maxHeight = '100%';
-
-      if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(media.url);
-        hls.attachMedia(video);
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = media.url;
-      }
-
-      player.appendChild(video);
-    } else {
-      // Regular video or audio file
-      const source = document.createElement('source');
-      source.src = media.url;
-
-      const video = document.createElement('video');
-      video.controls = true;
-      video.autoplay = true;
-      video.style.maxWidth = '100%';
-      video.style.maxHeight = '100%';
-      video.appendChild(source);
-
-      player.appendChild(video);
-    }
-
-    const title = document.createElement('p');
-    title.textContent = `Now Playing: ${media.title}`;
-    player.appendChild(title);
-
-    // Update the selected index for the current media type
-    selectedIndexes[type] = index;
-
-    // Set the active playing item and update the UI
-    const listItems = panel.querySelectorAll('.list-item');
-    listItems.forEach((item, idx) => {
-      if (idx === index) {
-        item.classList.add('playing');
-      } else {
-        item.classList.remove('playing');
-      }
-    });
-  }
-</script>
+  </script>
 </body>
 
 </html>
