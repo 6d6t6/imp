@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMP [v1]</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca&display=swap" rel="stylesheet">
+  <meta property="og:title" content="IMP: Internet Media Player">
+  <meta property="og:description" content="Watch your favorite internet media.">
+  <meta property="og:image" content="icon.png">
+  <meta property="og:url" content="https://6d6t6.github.io/imp">
+  <meta property="og:type" content="website">
+  <style>
+    /* General Styles */
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+      color: #808080;
+      background-color: #080808;
+      /* Added background color for the dark theme */
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Navigation Bar */
+
+    .navigation-bar {
+      background-color: #080808;
+      width: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .navigation-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .navigation-menu li {
+      margin-bottom: 20px;
+    }
+
+    .navigation-menu a {
+      color: #808080;
+      text-decoration: none;
+    }
+
+    /* Updated CSS rule for active navigation menu item */
+    .navigation-menu li.active a {
+      color: #ffffff;
+    }
+
+    /* Panel */
+
+    .panel {
+      flex: 1;
+      padding: 20px;
+      background-color: #101010;
+      overflow-y: auto;
+    }
+
+    /* Player */
+
+    .player {
+      flex: 2;
+      background-color: #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      padding: 20px;
+      position: relative; /* Added positioning for video player containment */
+    }
+
+    .player video {
+      max-width: 100%; /* Limit video player width to panel size */
+      max-height: 100%; /* Limit video player height to panel size */
+    }
+
+    /* Updated CSS rules for the panel and player */
+
+    .panel.hidden {
+      display: none;
+    }
+
+    .player.expanded {
+      flex: 3;
+    }
+
+    /* Add Content */
+
+    .add-content-form {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .add-content-form label {
+        margin-bottom: 5px;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: small;
+    }
+
+    .add-content-form input[type="text"] {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #303030;
+      color: #ffffff;
+    }
+
+    .add-content-form input[type="button"] {
+        background-color: #e93f38;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 6px;
+        margin-block-start: 20px;
+        text-transform: uppercase;
+    }
+
+    /* Message for no content */
+
+    .no-content-message {
+      color: #ffffff;
+      text-align: center;
+    }
+
+    /* Updated CSS rules for the lists in the section panels */
+    .panel ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .panel ul li {
+      margin-bottom: 10px;
+      color: #808080;
+      cursor: pointer;
+    }
+
+    .panel ul li.playing {
+      color: #ffffff;
+    }
+
+    h2 {
+        margin-block-start: 0px;
+    }
+
+    select#typeSelect {
+        padding: 10px;
+        border-radius: 6px;
+        background: #303030;
+        border: none;
+        color: #ffffff;
+    }
+
+    /* Updated CSS rules for the player panel */
+    .player-controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .player-controls button {
+      background: none;
+      border: none;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 24px;
+      margin: 0 5px;
+    }
+
+    /* Updated CSS rule for disabled player controls */
+    .player-controls button:disabled {
+      color: #808080;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <nav class="navigation-bar">
+      <ul class="navigation-menu">
+        <li><a href="#" data-type="music"><i class="material-icons">music_note</i></a></li>
+        <li><a href="#" data-type="video"><i class="material-icons">theaters</i></a></li>
+        <li><a href="#" data-type="radio"><i class="material-icons">radio</i></a></li>
+        <li><a href="#" data-type="tv"><i class="material-icons">tv</i></a></li>
+        <li><a href="#" data-type="add" class="active"><i class="material-icons">add_circle</i></a></li>
+        <li><a href="#" data-type="settings"><i class="material-icons">settings</i></a></li>
+      </ul>
+    </nav>
+
+    <div class="panel">
+      <!-- Content for the panel goes here -->
+    </div>
+
+    <div class="player">
+      <!-- Content for the player goes here -->
+    </div>
+  </div>
+
+  <!-- Add your JavaScript scripts here -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script>
+    // DOM elements
+    const navigationMenu = document.querySelector('.navigation-menu');
+    const panel = document.querySelector('.panel');
+    const player = document.querySelector('.player');
+
+    // Selected index for each media type
+    const selectedIndexes = {
+      music: 0,
+      video: 0,
+      radio: 0,
+      tv: 0,
+    };
+
+    // Event listeners
+    navigationMenu.addEventListener('click', handleNavigationMenuClick);
+
+    // Handle navigation menu click
+    function handleNavigationMenuClick(event) {
+      event.preventDefault();
+      const target = event.target.closest('li');
+      if (target) {
+        // Remove active class from all navigation menu items
+        navigationMenu.querySelectorAll('li').forEach(item => {
+          item.classList.remove('active');
+        });
+        // Add active class to the clicked menu item
+        target.classList.add('active');
+        // Display corresponding content in the panel based on the clicked menu item
+        const selectedMenuItem = target.querySelector('a');
+        const selectedType = selectedMenuItem.dataset.type;
+        renderPanelContent(selectedType);
+
+        // Remove the toggle functionality for the panel and player
+        panel.classList.remove('hidden');
+        player.classList.remove('expanded');
+      }
+    }
+
+    // Render content in the panel based on the selected type
+    function renderPanelContent(type) {
+      // Clear previous content
+      panel.innerHTML = '';
+
+      // Set the header
+      const header = document.createElement('h2');
+      header.textContent = capitalizeFirstLetter(type);
+      panel.appendChild(header);
+
+      if (type === 'add') {
+        // Display the add content form
+        renderAddContentForm();
+      } else {
+        // Load and display the media content based on the type
+        const media = getMediaByType(type);
+        if (media.length > 0) {
+          const ul = document.createElement('ul');
+          media.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.textContent = item.title;
+            li.classList.add('list-item');
+            if (index === selectedIndexes[type]) {
+              li.classList.add('playing');
+            }
+            li.addEventListener('click', () => playMedia(item, index, type));
+            ul.appendChild(li);
+          });
+          panel.appendChild(ul);
+        } else {
+          const message = document.createElement('p');
+          message.className = 'no-content-message';
+          message.textContent = 'No content available.';
+          panel.appendChild(message);
+        }
+      }
+    }
+
+    // Render the add content form
+    function renderAddContentForm() {
+      const form = document.createElement('form');
+      form.className = 'add-content-form';
+
+      const titleLabel = document.createElement('label');
+      titleLabel.textContent = 'Title';
+      const titleInput = document.createElement('input');
+      titleInput.type = 'text';
+      titleInput.id = 'titleInput';
+      form.appendChild(titleLabel);
+      form.appendChild(titleInput);
+
+      const urlLabel = document.createElement('label');
+      urlLabel.textContent = 'URL';
+      const urlInput = document.createElement('input');
+      urlInput.type = 'text';
+      urlInput.id = 'urlInput';
+      form.appendChild(urlLabel);
+      form.appendChild(urlInput);
+
+      const typeLabel = document.createElement('label');
+      typeLabel.textContent = 'Type';
+      const typeSelect = document.createElement('select');
+      typeSelect.id = 'typeSelect';
+
+      const musicOption = document.createElement('option');
+      musicOption.value = 'music';
+      musicOption.textContent = 'Song';
+      typeSelect.appendChild(musicOption);
+
+      const videoOption = document.createElement('option');
+      videoOption.value = 'video';
+      videoOption.textContent = 'Video';
+      typeSelect.appendChild(videoOption);
+
+      const radioOption = document.createElement('option');
+      radioOption.value = 'radio';
+      radioOption.textContent = 'Radio Station';
+      typeSelect.appendChild(radioOption);
+
+      const tvOption = document.createElement('option');
+      tvOption.value = 'tv';
+      tvOption.textContent = 'TV Channel';
+      typeSelect.appendChild(tvOption);
+
+      form.appendChild(typeLabel);
+      form.appendChild(typeSelect);
+
+      const addButton = document.createElement('input');
+      addButton.type = 'button';
+      addButton.value = 'Save';
+      addButton.addEventListener('click', handleAddContentClick);
+      form.appendChild(addButton);
+
+      panel.appendChild(form);
+    }
+
+    // Get the media items based on the type
+    function getMediaByType(type) {
+      // Retrieve media list from local storage based on the type
+      const mediaList = localStorage.getItem(type);
+      return mediaList ? JSON.parse(mediaList) : [];
+    }
+
+    // Save the media list to local storage
+    function saveMediaByType(type, mediaList) {
+      localStorage.setItem(type, JSON.stringify(mediaList));
+    }
+
+    // Capitalize the first letter of a string
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    // Trigger a click event on the Add menu item to select it by default
+    const addMenuItem = document.querySelector('a[data-type="add"]');
+    if (addMenuItem) {
+      addMenuItem.click();
+    }
+
+    // Handle add content button click
+    function handleAddContentClick() {
+      const titleInput = document.getElementById('titleInput');
+      const urlInput = document.getElementById('urlInput');
+      const typeSelect = document.getElementById('typeSelect');
+
+      const title = titleInput.value.trim();
+      const url = urlInput.value.trim();
+      const type = typeSelect.value;
+
+      if (title !== '' && url !== '') {
+        const mediaItem = {
+          title: title,
+          url: url,
+        };
+
+        const mediaList = getMediaByType(type);
+        mediaList.push(mediaItem);
+        saveMediaByType(type, mediaList);
+
+        titleInput.value = '';
+        urlInput.value = '';
+
+        renderPanelContent(type);
+
+        // Update active state of the section icon
+        const navigationItems = navigationMenu.querySelectorAll('li');
+        navigationItems.forEach(item => {
+          item.classList.remove('active');
+        });
+
+        const selectedMenuItem = navigationMenu.querySelector(`[data-type="${type}"]`);
+        selectedMenuItem.closest('li').classList.add('active');
+      }
+    }
+
+    // Play the selected media
+    function playMedia(media, index, type) {
+      player.innerHTML = ''; // Clear previous media
+
+      if (media.url.endsWith('.m3u8')) {
+        // HLS stream
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        video.style.maxWidth = '100%';
+        video.style.maxHeight = '100%';
+
+        if (Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(media.url);
+          hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+          video.src = media.url;
+        }
+
+        player.appendChild(video);
+      } else {
+        // Regular video or audio file
+        const source = document.createElement('source');
+        source.src = media.url;
+
+        const video = document.createElement('video');
+        video.controls = true;
+        video.autoplay = true;
+        video.style.maxWidth = '100%';
+        video.style.maxHeight = '100%';
+        video.appendChild(source);
+
+        player.appendChild(video);
+      }
+
+      const title = document.createElement('p');
+      title.textContent = `Now Playing: ${media.title}`;
+      player.appendChild(title);
+
+      // Update the selected index for the current media type
+      selectedIndexes[type] = index;
+
+      // Set the active playing item and update the UI
+      const listItems = panel.querySelectorAll('.list-item');
+      listItems.forEach((item, idx) => {
+        if (idx === index) {
+          item.classList.add('playing');
+        } else {
+          item.classList.remove('playing');
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
