@@ -214,7 +214,23 @@
     }
 
     .remove-data-button {
-      margin-top: 20px;
+      margin-top: 0;
+    }
+    
+    input[type="button"] {
+      background-color: #e93f38;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      text-transform: uppercase;
+      font-family: 'Lexend Deca', Arial, sans-serif;
     }
   </style>
 </head>
@@ -329,23 +345,23 @@
           const exportPanel = document.createElement('div');
           exportPanel.className = 'export-panel';
           exportPanel.innerHTML = `
-            <h2>Export</h2>
+            <h3>Export Library</h3>
             <p>Click the button below to export your IMP Library data.</p>
             <input type="button" value="Export" onclick="exportData()">
           `;
           const importPanel = document.createElement('div');
           importPanel.className = 'import-panel';
           importPanel.innerHTML = `
-            <h2>Import</h2>
-            <p>Select a JSON file containing your IMP Library data and click the button below to import it.</p>
+            <h3>Import Library</h3>
+            <p>Click the button below to import a JSON file containing your IMP Library data. This will replace your current library.</p>
             <input type="file" accept=".json" id="importFile" style="display: none;">
             <input type="button" value="Import" onclick="showImportConfirmation()">
           `;
           const removeDataPanel = document.createElement('div');
           removeDataPanel.className = 'remove-data-panel';
           removeDataPanel.innerHTML = `
-            <h2>Remove Data</h2>
-            <p>Click the button below to remove all content data from the web app (local storage).</p>
+            <h3>Delete Library</h3>
+            <p>Click the button below to remove all library data from IMP (clears local storage).</p>
             <input type="button" value="Remove All Data" onclick="showRemoveDataConfirmation()" class="remove-data-button">
           `;
           settingsPanel.appendChild(exportPanel);
