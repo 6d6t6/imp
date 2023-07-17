@@ -141,9 +141,6 @@
       margin-bottom: 10px;
       color: #808080;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
 
     .panel ul li.playing {
@@ -218,15 +215,6 @@
 
     .remove-data-button {
       margin-top: 20px;
-    }
-
-    .delete-icon {
-      cursor: pointer;
-      color: #303030;
-    }
-
-    .delete-icon:hover {
-      color: #e93f38;
     }
   </style>
 </head>
@@ -311,16 +299,7 @@
             media.sort((a, b) => a.title.localeCompare(b.title));
             media.forEach((item, index) => {
               const li = document.createElement('li');
-              const titleSpan = document.createElement('span');
-              titleSpan.textContent = item.title;
-              li.appendChild(titleSpan);
-
-              const deleteIcon = document.createElement('i');
-              deleteIcon.className = 'material-icons delete-icon';
-              deleteIcon.textContent = 'close';
-              deleteIcon.addEventListener('click', () => confirmDeleteMedia(item, index, type));
-              li.appendChild(deleteIcon);
-
+              li.textContent = item.title;
               li.classList.add('list-item');
               if (index === selectedIndexes[type]) {
                 li.classList.add('playing');
@@ -464,7 +443,7 @@
       function filterMediaList(list, searchValue) {
         const items = list.querySelectorAll('.list-item');
         items.forEach(item => {
-          const title = item.querySelector('span').textContent.toLowerCase();
+          const title = item.textContent.toLowerCase();
           if (title.includes(searchValue.toLowerCase())) {
             item.style.display = 'block';
           } else {
@@ -673,27 +652,12 @@
       }
       
       function removeAllData() {
-        localStorage.removeItem('music');
-        localStorage.removeItem('video');
-        localStorage.removeItem('radio');
-        localStorage.removeItem('tv');
-        localStorage.removeItem('web');
+        Object.keys(selectedIndexes).forEach(type => {
+          localStorage.removeItem(type);
+        });
         const activeMenuItem = navigationMenu.querySelector('li.active');
         const activeType = activeMenuItem.querySelector('a').dataset.type;
         renderPanelContent(activeType);
-      }
-      
-      function confirmDeleteMedia(media, index, type) {
-        if (confirm('Are you sure you want to delete this media?')) {
-          deleteMedia(media, index, type);
-        }
-      }
-      
-      function deleteMedia(media, index, type) {
-        const mediaList = getMediaByType(type);
-        mediaList.splice(index, 1);
-        saveMediaByType(type, mediaList);
-        renderPanelContent(type);
       }
     </script>
   </body>
