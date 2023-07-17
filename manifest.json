@@ -1,7 +1,7 @@
 {
   "name": "IMP",
   "short_name": "IMP",
-  "description": "Internet Media Player: Watch your favorite internet media.",
+  "description": "Internet Media Player - Play your favorite internet media.",
   "icons": [
     {
       "src": "icon.png",
