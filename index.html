@@ -109,10 +109,10 @@
     }
 
     .add-content-form label {
-        margin-bottom: 5px;
-        font-weight: bold;
-        text-transform: uppercase;
-        font-size: small;
+      margin-bottom: 5px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: small;
     }
 
     .add-content-form input[type="text"] {
@@ -122,21 +122,23 @@
       border: none;
       background: #303030;
       color: #ffffff;
+      font-family: 'Lexend Deca', Arial, sans-serif;
     }
 
     .add-content-form input[type="button"] {
-        background-color: #e93f38;
-        border: none;
-        color: white;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 6px;
-        margin-block-start: 20px;
-        text-transform: uppercase;
+      background-color: #e93f38;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-block-start: 20px;
+      text-transform: uppercase;
+      font-family: 'Lexend Deca', Arial, sans-serif;
     }
 
     /* Message for no content */
@@ -173,6 +175,7 @@
       background: #303030;
       border: none;
       color: #ffffff;
+      font-family: 'Lexend Deca', Arial, sans-serif;
     }
 
     iframe {
@@ -205,6 +208,37 @@
       color: #808080;
       cursor: not-allowed;
     }
+
+    /* Search Bar */
+
+.search-bar {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.search-bar input[type="text"] {
+  margin-bottom: 0px;
+  padding: 10px 10px 10px 40px;
+  border-radius: 8px;
+  border: none;
+  background: #303030;
+  color: #ffffff;
+  font-family: 'Lexend Deca', Arial, sans-serif;
+  width: calc(100% - 50px); /* Set the width of the input */
+}
+
+.search-icon {
+  position: absolute;
+  top: 50%;
+  left: 10px; /* Adjust the left position to fit inside the input */
+  transform: translateY(-50%);
+  color: #808080;
+}
+
+.remove-data-button {
+  margin-top: 20px;
+}
+
   </style>
 </head>
 
@@ -216,6 +250,7 @@
         <li><a href="#" data-type="video"><i class="material-icons">theaters</i></a></li>
         <li><a href="#" data-type="radio"><i class="material-icons">radio</i></a></li>
         <li><a href="#" data-type="tv"><i class="material-icons">tv</i></a></li>
+        <li><a href="#" data-type="web"><i class="material-icons">language</i></a></li>
         <li><a href="#" data-type="add" class="active"><i class="material-icons">add_circle</i></a></li>
         <li><a href="#" data-type="settings"><i class="material-icons">settings</i></a></li>
       </ul>
@@ -237,13 +272,17 @@
     const navigationMenu = document.querySelector('.navigation-menu');
     const panel = document.querySelector('.panel');
     const player = document.querySelector('.player');
-
+    const exportButton = document.createElement('input');
+    const importButton = document.createElement('input');
+    const removeDataButton = document.createElement('input');
+    
     // Selected index for each media type
     const selectedIndexes = {
       music: 0,
       video: 0,
       radio: 0,
       tv: 0,
+      web: 0, // Added "web" section
     };
 
     // Event listeners
@@ -288,7 +327,12 @@
         // Load and display the media content based on the type
         const media = getMediaByType(type);
         if (media.length > 0) {
+          const searchInput = createSearchInput();
+          panel.appendChild(searchInput);
+
           const ul = document.createElement('ul');
+          ul.classList.add('media-list');
+          media.sort((a, b) => a.title.localeCompare(b.title)); // Sort media items alphabetically by title
           media.forEach((item, index) => {
             const li = document.createElement('li');
             li.textContent = item.title;
@@ -300,12 +344,52 @@
             ul.appendChild(li);
           });
           panel.appendChild(ul);
+
+          // Filter the list based on search input
+          const mediaList = panel.querySelector('.media-list');
+          const searchInputField = panel.querySelector('.search-bar input[type="text"]');
+          searchInputField.addEventListener('input', () => {
+            filterMediaList(mediaList, searchInputField.value);
+          });
         } else {
           const message = document.createElement('p');
           message.className = 'no-content-message';
           message.textContent = 'No content available.';
           panel.appendChild(message);
         }
+      }
+      
+      // Add Export and Import buttons to the Settings panel
+      if (type === 'settings') {
+        const settingsPanel = document.querySelector('.panel');
+        const exportPanel = document.createElement('div');
+        exportPanel.className = 'export-panel';
+        exportPanel.innerHTML = `
+          <h2>Export</h2>
+          <p>Click the button below to export your IMP Library data.</p>
+          <input type="button" value="Export" onclick="exportData()">
+        `;
+        const importPanel = document.createElement('div');
+        importPanel.className = 'import-panel';
+        importPanel.innerHTML = `
+          <h2>Import</h2>
+          <p>Select a JSON file containing your IMP Library data and click the button below to import it.</p>
+          <input type="file" accept=".json" id="importFile" style="display: none;">
+          <label for="importFile">
+            <input type="button" value="Select File" onclick="document.getElementById('importFile').click()" style="cursor: pointer;">
+          </label>
+          <input type="button" value="Import" onclick="showImportConfirmation()">
+        `;
+        const removeDataPanel = document.createElement('div');
+        removeDataPanel.className = 'remove-data-panel';
+        removeDataPanel.innerHTML = `
+          <h2>Remove Data</h2>
+          <p>Click the button below to remove all content data from the web app (local storage).</p>
+          <input type="button" value="Remove All Data" onclick="showRemoveDataConfirmation()" class="remove-data-button">
+        `;
+        settingsPanel.appendChild(exportPanel);
+        settingsPanel.appendChild(importPanel);
+        settingsPanel.appendChild(removeDataPanel);
       }
     }
 
@@ -315,7 +399,7 @@
       form.className = 'add-content-form';
 
       const titleLabel = document.createElement('label');
-      titleLabel.textContent = 'Title:';
+      titleLabel.textContent = 'Title';
       const titleInput = document.createElement('input');
       titleInput.type = 'text';
       titleInput.id = 'titleInput';
@@ -323,7 +407,7 @@
       form.appendChild(titleInput);
 
       const urlLabel = document.createElement('label');
-      urlLabel.textContent = 'URL:';
+      urlLabel.textContent = 'URL';
       const urlInput = document.createElement('input');
       urlInput.type = 'text';
       urlInput.id = 'urlInput';
@@ -355,6 +439,11 @@
       tvOption.textContent = 'TV Channel';
       typeSelect.appendChild(tvOption);
 
+      const webOption = document.createElement('option'); // Add option for the "web" section
+      webOption.value = 'web';
+      webOption.textContent = 'Web';
+      typeSelect.appendChild(webOption);
+
       form.appendChild(typeLabel);
       form.appendChild(typeSelect);
 
@@ -365,6 +454,45 @@
       form.appendChild(addButton);
 
       panel.appendChild(form);
+    }
+
+    // Create the search input
+    function createSearchInput() {
+      const searchContainer = document.createElement('div');
+      searchContainer.className = 'search-bar';
+
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.placeholder = 'Search';
+      searchInput.addEventListener('input', handleSearchInput);
+      searchContainer.appendChild(searchInput);
+
+      const searchIcon = document.createElement('i');
+      searchIcon.className = 'material-icons search-icon';
+      searchIcon.textContent = 'search';
+      searchContainer.appendChild(searchIcon);
+
+      return searchContainer;
+    }
+
+    // Handle the search input
+    function handleSearchInput(event) {
+      const searchValue = event.target.value;
+      const mediaList = panel.querySelector('.media-list');
+      filterMediaList(mediaList, searchValue);
+    }
+
+    // Filter the media list based on the search value
+    function filterMediaList(list, searchValue) {
+      const items = list.querySelectorAll('.list-item');
+      items.forEach(item => {
+        const title = item.textContent.toLowerCase();
+        if (title.includes(searchValue.toLowerCase())) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
     }
 
     // Get the media items based on the type
@@ -411,9 +539,15 @@
           url: url,
         };
 
-        const mediaList = getMediaByType(type);
-        mediaList.push(mediaItem);
-        saveMediaByType(type, mediaList);
+        if (type === 'web') { // Check for the "web" section
+          const webMediaList = getMediaByType(type);
+          webMediaList.push(mediaItem);
+          saveMediaByType(type, webMediaList);
+        } else {
+          const mediaList = getMediaByType(type);
+          mediaList.push(mediaItem);
+          saveMediaByType(type, mediaList);
+        }
 
         titleInput.value = '';
         urlInput.value = '';
@@ -444,7 +578,6 @@
       }
     }
 
-    // Play the selected media
     function playMedia(media, index, type) {
       player.innerHTML = ''; // Clear previous media
 
@@ -458,15 +591,12 @@
 
         player.appendChild(video);
 
-        // Listen for the "onStateChange" event to autoplay the next video
-        video.addEventListener('onStateChange', event => {
-          if (event.data === 0) {
-            // Video ended, play the next one
-            const mediaList = getMediaByType(type);
-            const nextIndex = (index + 1) % mediaList.length;
-            const nextMedia = mediaList[nextIndex];
-            playMedia(nextMedia, nextIndex, type);
-          }
+        // Listen for the "ended" event to autoplay the next video
+        video.addEventListener('ended', () => {
+          const mediaList = getMediaByType(type);
+          const nextIndex = (index + 1) % mediaList.length;
+          const nextMedia = mediaList[nextIndex];
+          playMedia(nextMedia, nextIndex, type);
         });
       } else if (media.url.endsWith('.m3u8')) {
         // HLS stream
@@ -507,7 +637,7 @@
 
         player.appendChild(video);
 
-        // Listen for the "ended" event to autoplay the next video
+        // Listen for the "ended" event to autoplay the next media
         video.addEventListener('ended', () => {
           const mediaList = getMediaByType(type);
           const nextIndex = (index + 1) % mediaList.length;
@@ -516,22 +646,79 @@
         });
       }
 
-      const title = document.createElement('p');
-      title.textContent = `Now Playing: ${media.title}`;
-      player.appendChild(title);
-
-      // Update the selected index for the current media type
+      // Update the selected index for the media type
       selectedIndexes[type] = index;
 
-      // Set the active playing item and update the UI
-      const listItems = panel.querySelectorAll('.list-item');
-      listItems.forEach((item, idx) => {
-        if (idx === index) {
-          item.classList.add('playing');
-        } else {
-          item.classList.remove('playing');
-        }
+      // Update the active state of the media list items
+      const mediaListItems = panel.querySelectorAll('ul li');
+      mediaListItems.forEach(item => {
+        item.classList.remove('playing');
       });
+      mediaListItems[index].classList.add('playing');
+    }
+    
+    // Export data function
+    function exportData() {
+      const exportData = {
+        music: getMediaByType('music'),
+        video: getMediaByType('video'),
+        radio: getMediaByType('radio'),
+        tv: getMediaByType('tv'),
+        web: getMediaByType('web'),
+      };
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      const exportLink = document.createElement('a');
+      exportLink.setAttribute('href', dataUri);
+      exportLink.setAttribute('download', 'imp-data.json');
+      exportLink.click();
+    }
+    
+    // Show import confirmation dialog
+    function showImportConfirmation() {
+      importButton.setAttribute('type', 'file');
+      importButton.setAttribute('accept', '.json');
+      importButton.style.display = 'none';
+      importButton.addEventListener('change', importData);
+      document.body.appendChild(importButton);
+      importButton.click();
+      document.body.removeChild(importButton);
+    }
+    
+    // Import data function
+    function importData(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const contents = e.target.result;
+        const importedData = JSON.parse(contents);
+        if (confirm('WARNING: THIS OVERWRITE YOUR EXISTING IMP LIBRARY! Are you sure you want to IMPORT this library data?')) {
+          Object.keys(importedData).forEach(type => {
+            saveMediaByType(type, importedData[type]);
+          });
+          const activeMenuItem = navigationMenu.querySelector('li.active');
+          const activeType = activeMenuItem.querySelector('a').dataset.type;
+          renderPanelContent(activeType);
+        }
+      };
+      reader.readAsText(file);
+    }
+    
+    // Show remove data confirmation dialog
+    function showRemoveDataConfirmation() {
+      if (confirm('WARNING: THIS WILL REMOVE ALL DATA FROM YOUR IMP LIBRARY! This action cannot be undone without a back-up. Are you sure you want to REMOVE ALL DATA?')) {
+        removeAllData();
+      }
+    }
+    
+    // Remove all data function
+    function removeAllData() {
+      Object.keys(selectedIndexes).forEach(type => {
+        localStorage.removeItem(type);
+      });
+      const activeMenuItem = navigationMenu.querySelector('li.active');
+      const activeType = activeMenuItem.querySelector('a').dataset.type;
+      renderPanelContent(activeType);
     }
   </script>
 </body>
