@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IMP [v2.5]</title>
+  <title>IMP [v3]</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="favicon.png" type="image/png">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -15,23 +14,18 @@
   <meta property="og:url" content="https://6d6t6.github.io/imp">
   <meta property="og:type" content="website">
   <style>
-    /* General Styles */
-
     body {
       margin: 0;
       padding: 0;
       font-family: 'Lexend Deca', Arial, sans-serif;
       color: #808080;
       background-color: #080808;
-      /* Added background color for the dark theme */
     }
 
     .container {
       display: flex;
       height: 100vh;
     }
-
-    /* Navigation Bar */
 
     .navigation-bar {
       background-color: #080808;
@@ -57,12 +51,9 @@
       text-decoration: none;
     }
 
-    /* Updated CSS rule for active navigation menu item */
     .navigation-menu li.active a {
       color: #ffffff;
     }
-
-    /* Panel */
 
     .panel {
       flex: 1;
@@ -70,8 +61,6 @@
       background-color: #101010;
       overflow-y: auto;
     }
-
-    /* Player */
 
     .player {
       flex: 2;
@@ -82,15 +71,13 @@
       justify-content: center;
       color: #ffffff;
       padding: 20px;
-      position: relative; /* Added positioning for video player containment */
+      position: relative;
     }
 
     .player video {
-      max-width: 100%; /* Limit video player width to panel size */
-      max-height: 100%; /* Limit video player height to panel size */
+      max-width: 100%;
+      max-height: 100%;
     }
-
-    /* Updated CSS rules for the panel and player */
 
     .panel.hidden {
       display: none;
@@ -99,8 +86,6 @@
     .player.expanded {
       flex: 3;
     }
-
-    /* Add Content */
 
     .add-content-form {
       display: flex;
@@ -141,14 +126,11 @@
       font-family: 'Lexend Deca', Arial, sans-serif;
     }
 
-    /* Message for no content */
-
     .no-content-message {
       color: #ffffff;
       text-align: center;
     }
 
-    /* Updated CSS rules for the lists in the section panels */
     .panel ul {
       list-style: none;
       padding: 0;
@@ -159,6 +141,9 @@
       margin-bottom: 10px;
       color: #808080;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .panel ul li.playing {
@@ -187,7 +172,6 @@
       border-radius: 6px;
     }
 
-    /* Updated CSS rules for the player panel */
     .player-controls {
       display: flex;
       justify-content: center;
@@ -203,524 +187,514 @@
       margin: 0 5px;
     }
 
-    /* Updated CSS rule for disabled player controls */
     .player-controls button:disabled {
       color: #808080;
       cursor: not-allowed;
     }
 
-    /* Search Bar */
-
-.search-bar {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.search-bar input[type="text"] {
-  margin-bottom: 0px;
-  padding: 10px 10px 10px 40px;
-  border-radius: 8px;
-  border: none;
-  background: #303030;
-  color: #ffffff;
-  font-family: 'Lexend Deca', Arial, sans-serif;
-  width: calc(100% - 50px); /* Set the width of the input */
-}
-
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 10px; /* Adjust the left position to fit inside the input */
-  transform: translateY(-50%);
-  color: #808080;
-}
-
-.remove-data-button {
-  margin-top: 20px;
-}
-
-  </style>
-</head>
-
-<body>
-  <div class="container">
-    <nav class="navigation-bar">
-      <ul class="navigation-menu">
-        <li><a href="#" data-type="music"><i class="material-icons">music_note</i></a></li>
-        <li><a href="#" data-type="video"><i class="material-icons">theaters</i></a></li>
-        <li><a href="#" data-type="radio"><i class="material-icons">radio</i></a></li>
-        <li><a href="#" data-type="tv"><i class="material-icons">tv</i></a></li>
-        <li><a href="#" data-type="web"><i class="material-icons">language</i></a></li>
-        <li><a href="#" data-type="add" class="active"><i class="material-icons">add_circle</i></a></li>
-        <li><a href="#" data-type="settings"><i class="material-icons">settings</i></a></li>
-      </ul>
-    </nav>
-
-    <div class="panel">
-      <!-- Content for the panel goes here -->
-    </div>
-
-    <div class="player">
-      <!-- Content for the player goes here -->
-    </div>
-  </div>
-
-  <!-- Add your JavaScript scripts here -->
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script>
-    // DOM elements
-    const navigationMenu = document.querySelector('.navigation-menu');
-    const panel = document.querySelector('.panel');
-    const player = document.querySelector('.player');
-    const exportButton = document.createElement('input');
-    const importButton = document.createElement('input');
-    const removeDataButton = document.createElement('input');
-    
-    // Selected index for each media type
-    const selectedIndexes = {
-      music: 0,
-      video: 0,
-      radio: 0,
-      tv: 0,
-      web: 0, // Added "web" section
-    };
-
-    // Event listeners
-    navigationMenu.addEventListener('click', handleNavigationMenuClick);
-
-    // Handle navigation menu click
-    function handleNavigationMenuClick(event) {
-      event.preventDefault();
-      const target = event.target.closest('li');
-      if (target) {
-        // Remove active class from all navigation menu items
-        navigationMenu.querySelectorAll('li').forEach(item => {
-          item.classList.remove('active');
-        });
-        // Add active class to the clicked menu item
-        target.classList.add('active');
-        // Display corresponding content in the panel based on the clicked menu item
-        const selectedMenuItem = target.querySelector('a');
-        const selectedType = selectedMenuItem.dataset.type;
-        renderPanelContent(selectedType);
-
-        // Remove the toggle functionality for the panel and player
-        panel.classList.remove('hidden');
-        player.classList.remove('expanded');
-      }
+    .search-bar {
+      position: relative;
+      margin-bottom: 20px;
     }
 
-    // Render content in the panel based on the selected type
-    function renderPanelContent(type) {
-      // Clear previous content
-      panel.innerHTML = '';
+    .search-bar input[type="text"] {
+      margin-bottom: 0px;
+      padding: 10px 10px 10px 40px;
+      border-radius: 8px;
+      border: none;
+      background: #303030;
+      color: #ffffff;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+      width: calc(100% - 50px);
+    }
 
-      // Set the header
-      const header = document.createElement('h2');
-      header.textContent = capitalizeFirstLetter(type);
-      panel.appendChild(header);
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      color: #808080;
+    }
 
-      if (type === 'add') {
-        // Display the add content form
-        renderAddContentForm();
-      } else {
-        // Load and display the media content based on the type
-        const media = getMediaByType(type);
-        if (media.length > 0) {
-          const searchInput = createSearchInput();
-          panel.appendChild(searchInput);
+    .remove-data-button {
+      margin-top: 20px;
+    }
 
-          const ul = document.createElement('ul');
-          ul.classList.add('media-list');
-          media.sort((a, b) => a.title.localeCompare(b.title)); // Sort media items alphabetically by title
-          media.forEach((item, index) => {
-            const li = document.createElement('li');
-            li.textContent = item.title;
-            li.classList.add('list-item');
-            if (index === selectedIndexes[type]) {
-              li.classList.add('playing');
-            }
-            li.addEventListener('click', () => playMedia(item, index, type));
-            ul.appendChild(li);
+    .delete-icon {
+      cursor: pointer;
+      color: #303030;
+    }
+
+    .delete-icon:hover {
+      color: #e93f38;
+    }
+  </style>
+</head>
+  <body>
+    <div class="container">
+      <nav class="navigation-bar">
+        <ul class="navigation-menu">
+          <li><a href="#" data-type="music"><i class="material-icons">music_note</i></a></li>
+          <li><a href="#" data-type="video"><i class="material-icons">theaters</i></a></li>
+          <li><a href="#" data-type="radio"><i class="material-icons">radio</i></a></li>
+          <li><a href="#" data-type="tv"><i class="material-icons">tv</i></a></li>
+          <li><a href="#" data-type="web"><i class="material-icons">language</i></a></li>
+          <li><a href="#" data-type="add" class="active"><i class="material-icons">add_circle</i></a></li>
+          <li><a href="#" data-type="settings"><i class="material-icons">settings</i></a></li>
+        </ul>
+      </nav>
+
+      <div class="panel">
+        <!-- panel content -->
+      </div>
+
+      <div class="player">
+        <!-- player content -->
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+      // DOM elements
+      const navigationMenu = document.querySelector('.navigation-menu');
+      const panel = document.querySelector('.panel');
+      const player = document.querySelector('.player');
+      const exportButton = document.createElement('input');
+      const importButton = document.createElement('input');
+      const removeDataButton = document.createElement('input');
+      
+      const selectedIndexes = {
+        music: 0,
+        video: 0,
+        radio: 0,
+        tv: 0,
+        web: 0,
+      };
+
+      // Event listeners
+      navigationMenu.addEventListener('click', handleNavigationMenuClick);
+
+      function handleNavigationMenuClick(event) {
+        event.preventDefault();
+        const target = event.target.closest('li');
+        if (target) {
+          navigationMenu.querySelectorAll('li').forEach(item => {
+            item.classList.remove('active');
           });
-          panel.appendChild(ul);
+          target.classList.add('active');
+          const selectedMenuItem = target.querySelector('a');
+          const selectedType = selectedMenuItem.dataset.type;
+          renderPanelContent(selectedType);
 
-          // Filter the list based on search input
-          const mediaList = panel.querySelector('.media-list');
-          const searchInputField = panel.querySelector('.search-bar input[type="text"]');
-          searchInputField.addEventListener('input', () => {
-            filterMediaList(mediaList, searchInputField.value);
+          panel.classList.remove('hidden');
+          player.classList.remove('expanded');
+        }
+      }
+
+      function renderPanelContent(type) {
+        panel.innerHTML = '';
+
+        const header = document.createElement('h2');
+        header.textContent = capitalizeFirstLetter(type);
+        panel.appendChild(header);
+
+        if (type === 'add') {
+          renderAddContentForm();
+        } else {
+          const media = getMediaByType(type);
+          if (media.length > 0) {
+            const searchInput = createSearchInput();
+            panel.appendChild(searchInput);
+
+            const ul = document.createElement('ul');
+            ul.classList.add('media-list');
+            media.sort((a, b) => a.title.localeCompare(b.title));
+            media.forEach((item, index) => {
+              const li = document.createElement('li');
+              const titleSpan = document.createElement('span');
+              titleSpan.textContent = item.title;
+              li.appendChild(titleSpan);
+
+              const deleteIcon = document.createElement('i');
+              deleteIcon.className = 'material-icons delete-icon';
+              deleteIcon.textContent = 'close';
+              deleteIcon.addEventListener('click', () => confirmDeleteMedia(item, index, type));
+              li.appendChild(deleteIcon);
+
+              li.classList.add('list-item');
+              if (index === selectedIndexes[type]) {
+                li.classList.add('playing');
+              }
+              li.addEventListener('click', () => playMedia(item, index, type));
+              ul.appendChild(li);
+            });
+            panel.appendChild(ul);
+
+            const mediaList = panel.querySelector('.media-list');
+            const searchInputField = panel.querySelector('.search-bar input[type="text"]');
+            searchInputField.addEventListener('input', () => {
+              filterMediaList(mediaList, searchInputField.value);
+            });
+          } else {
+            if (type !== 'settings') {
+              const message = document.createElement('p');
+              message.className = 'no-content-message';
+              message.textContent = 'No content available.';
+              panel.appendChild(message);
+            }
+          }
+        }
+        
+        if (type === 'settings') {
+          const settingsPanel = document.querySelector('.panel');
+          const exportPanel = document.createElement('div');
+          exportPanel.className = 'export-panel';
+          exportPanel.innerHTML = `
+            <h2>Export</h2>
+            <p>Click the button below to export your IMP Library data.</p>
+            <input type="button" value="Export" onclick="exportData()">
+          `;
+          const importPanel = document.createElement('div');
+          importPanel.className = 'import-panel';
+          importPanel.innerHTML = `
+            <h2>Import</h2>
+            <p>Select a JSON file containing your IMP Library data and click the button below to import it.</p>
+            <input type="file" accept=".json" id="importFile" style="display: none;">
+            <input type="button" value="Import" onclick="showImportConfirmation()">
+          `;
+          const removeDataPanel = document.createElement('div');
+          removeDataPanel.className = 'remove-data-panel';
+          removeDataPanel.innerHTML = `
+            <h2>Remove Data</h2>
+            <p>Click the button below to remove all content data from the web app (local storage).</p>
+            <input type="button" value="Remove All Data" onclick="showRemoveDataConfirmation()" class="remove-data-button">
+          `;
+          settingsPanel.appendChild(exportPanel);
+          settingsPanel.appendChild(importPanel);
+          settingsPanel.appendChild(removeDataPanel);
+        }
+      }
+
+      function renderAddContentForm() {
+        const form = document.createElement('form');
+        form.className = 'add-content-form';
+
+        const titleLabel = document.createElement('label');
+        titleLabel.textContent = 'Title';
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.id = 'titleInput';
+        form.appendChild(titleLabel);
+        form.appendChild(titleInput);
+
+        const urlLabel = document.createElement('label');
+        urlLabel.textContent = 'URL';
+        const urlInput = document.createElement('input');
+        urlInput.type = 'text';
+        urlInput.id = 'urlInput';
+        form.appendChild(urlLabel);
+        form.appendChild(urlInput);
+
+        const typeLabel = document.createElement('label');
+        typeLabel.textContent = 'Type:';
+        const typeSelect = document.createElement('select');
+        typeSelect.id = 'typeSelect';
+
+        const musicOption = document.createElement('option');
+        musicOption.value = 'music';
+        musicOption.textContent = 'Song';
+        typeSelect.appendChild(musicOption);
+
+        const videoOption = document.createElement('option');
+        videoOption.value = 'video';
+        videoOption.textContent = 'Video';
+        typeSelect.appendChild(videoOption);
+
+        const radioOption = document.createElement('option');
+        radioOption.value = 'radio';
+        radioOption.textContent = 'Radio Station';
+        typeSelect.appendChild(radioOption);
+
+        const tvOption = document.createElement('option');
+        tvOption.value = 'tv';
+        tvOption.textContent = 'TV Channel';
+        typeSelect.appendChild(tvOption);
+
+        const webOption = document.createElement('option');
+        webOption.value = 'web';
+        webOption.textContent = 'Web (YouTube)';
+        typeSelect.appendChild(webOption);
+
+        form.appendChild(typeLabel);
+        form.appendChild(typeSelect);
+
+        const addButton = document.createElement('input');
+        addButton.type = 'button';
+        addButton.value = 'Save';
+        addButton.addEventListener('click', handleAddContentClick);
+        form.appendChild(addButton);
+
+        panel.appendChild(form);
+      }
+
+      function createSearchInput() {
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'search-bar';
+
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Search';
+        searchInput.addEventListener('input', handleSearchInput);
+        searchContainer.appendChild(searchInput);
+
+        const searchIcon = document.createElement('i');
+        searchIcon.className = 'material-icons search-icon';
+        searchIcon.textContent = 'search';
+        searchContainer.appendChild(searchIcon);
+
+        return searchContainer;
+      }
+
+      function handleSearchInput(event) {
+        const searchValue = event.target.value;
+        const mediaList = panel.querySelector('.media-list');
+        filterMediaList(mediaList, searchValue);
+      }
+
+      function filterMediaList(list, searchValue) {
+        const items = list.querySelectorAll('.list-item');
+        items.forEach(item => {
+          const title = item.querySelector('span').textContent.toLowerCase();
+          if (title.includes(searchValue.toLowerCase())) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      }
+
+      function getMediaByType(type) {
+        const mediaList = localStorage.getItem(type);
+        return mediaList ? JSON.parse(mediaList) : [];
+      }
+
+      function saveMediaByType(type, mediaList) {
+        localStorage.setItem(type, JSON.stringify(mediaList));
+      }
+
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      const addMenuItem = document.querySelector('a[data-type="add"]');
+      if (addMenuItem) {
+        addMenuItem.click();
+      }
+
+      function handleAddContentClick() {
+        const titleInput = document.getElementById('titleInput');
+        const urlInput = document.getElementById('urlInput');
+        const typeSelect = document.getElementById('typeSelect');
+
+        const title = titleInput.value.trim();
+        let url = urlInput.value.trim();
+        const type = typeSelect.value;
+
+        if (title !== '' && url !== '') {
+          if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            url = convertYouTubeUrl(url);
+          }
+
+          const mediaItem = {
+            title: title,
+            url: url,
+          };
+
+          if (type === 'web') {
+            const webMediaList = getMediaByType(type);
+            webMediaList.push(mediaItem);
+            saveMediaByType(type, webMediaList);
+          } else {
+            const mediaList = getMediaByType(type);
+            mediaList.push(mediaItem);
+            saveMediaByType(type, mediaList);
+          }
+
+          titleInput.value = '';
+          urlInput.value = '';
+
+          renderPanelContent(type);
+
+          const navigationItems = navigationMenu.querySelectorAll('li');
+          navigationItems.forEach(item => {
+            item.classList.remove('active');
+          });
+
+          const selectedMenuItem = navigationMenu.querySelector(`[data-type="${type}"]`);
+          selectedMenuItem.closest('li').classList.add('active');
+        }
+      }
+
+      function convertYouTubeUrl(url) {
+        if (url.includes('youtu.be')) {
+          const videoId = url.split('/').pop();
+          return `https://www.youtube.com/embed/${videoId}`;
+        } else {
+          const urlObj = new URL(url);
+          const videoId = urlObj.searchParams.get('v');
+          return `https://www.youtube.com/embed/${videoId}`;
+        }
+      }
+
+      function playMedia(media, index, type) {
+        player.innerHTML = '';
+
+        if (media.url.includes('youtube.com') || media.url.includes('youtu.be')) {
+          const video = document.createElement('iframe');
+          video.width = '100%';
+          video.height = '100%';
+          video.src = `${media.url}?autoplay=1`;
+          video.frameborder = '0';
+          video.allow = 'autoplay; fullscreen; encrypted-media';
+
+          player.appendChild(video);
+
+          video.addEventListener('ended', () => {
+            const mediaList = getMediaByType(type);
+            const nextIndex = (index + 1) % mediaList.length;
+            const nextMedia = mediaList[nextIndex];
+            playMedia(nextMedia, nextIndex, type);
+          });
+        } else if (media.url.endsWith('.m3u8')) {
+          // HLS stream
+          const video = document.createElement('video');
+          video.controls = true;
+          video.autoplay = true;
+          video.style.maxWidth = '100%';
+          video.style.maxHeight = '100%';
+
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(media.url);
+            hls.attachMedia(video);
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = media.url;
+          }
+
+          player.appendChild(video);
+
+          // Listen for the "ended" event to autoplay the next video
+          video.addEventListener('ended', () => {
+            const mediaList = getMediaByType(type);
+            const nextIndex = (index + 1) % mediaList.length;
+            const nextMedia = mediaList[nextIndex];
+            playMedia(nextMedia, nextIndex, type);
           });
         } else {
-          const message = document.createElement('p');
-          message.className = 'no-content-message';
-          message.textContent = 'No content available.';
-          panel.appendChild(message);
+          // Regular video or audio file
+          const source = document.createElement('source');
+          source.src = media.url;
+
+          const video = document.createElement('video');
+          video.controls = true;
+          video.autoplay = true;
+          video.style.maxWidth = '100%';
+          video.style.maxHeight = '100%';
+          video.appendChild(source);
+
+          player.appendChild(video);
+
+          // Listen for the "ended" event to autoplay the next media
+          video.addEventListener('ended', () => {
+            const mediaList = getMediaByType(type);
+            const nextIndex = (index + 1) % mediaList.length;
+            const nextMedia = mediaList[nextIndex];
+            playMedia(nextMedia, nextIndex, type);
+          });
+        }
+
+        selectedIndexes[type] = index;
+
+        const mediaListItems = panel.querySelectorAll('ul li');
+        mediaListItems.forEach(item => {
+          item.classList.remove('playing');
+        });
+        mediaListItems[index].classList.add('playing');
+      }
+      
+      function exportData() {
+        const exportData = {
+          music: getMediaByType('music'),
+          video: getMediaByType('video'),
+          radio: getMediaByType('radio'),
+          tv: getMediaByType('tv'),
+          web: getMediaByType('web'),
+        };
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const exportLink = document.createElement('a');
+        exportLink.setAttribute('href', dataUri);
+        exportLink.setAttribute('download', 'imp-data.json');
+        exportLink.click();
+      }
+      
+      function showImportConfirmation() {
+        importButton.setAttribute('type', 'file');
+        importButton.setAttribute('accept', '.json');
+        importButton.style.display = 'none';
+        importButton.addEventListener('change', importData);
+        document.body.appendChild(importButton);
+        importButton.click();
+        document.body.removeChild(importButton);
+      }
+      
+      function importData(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const contents = e.target.result;
+          const importedData = JSON.parse(contents);
+          if (confirm('WARNING: THIS OVERWRITE YOUR EXISTING IMP LIBRARY! Are you sure you want to IMPORT this library data?')) {
+            Object.keys(importedData).forEach(type => {
+              saveMediaByType(type, importedData[type]);
+            });
+            const activeMenuItem = navigationMenu.querySelector('li.active');
+            const activeType = activeMenuItem.querySelector('a').dataset.type;
+            renderPanelContent(activeType);
+          }
+        };
+        reader.readAsText(file);
+      }
+      
+      function showRemoveDataConfirmation() {
+        if (confirm('WARNING: THIS WILL REMOVE ALL DATA FROM YOUR IMP LIBRARY! This action cannot be undone without a back-up. Are you sure you want to REMOVE ALL DATA?')) {
+          removeAllData();
         }
       }
       
-      // Add Export and Import buttons to the Settings panel
-      if (type === 'settings') {
-        const settingsPanel = document.querySelector('.panel');
-        const exportPanel = document.createElement('div');
-        exportPanel.className = 'export-panel';
-        exportPanel.innerHTML = `
-          <h2>Export</h2>
-          <p>Click the button below to export your IMP Library data.</p>
-          <input type="button" value="Export" onclick="exportData()">
-        `;
-        const importPanel = document.createElement('div');
-        importPanel.className = 'import-panel';
-        importPanel.innerHTML = `
-          <h2>Import</h2>
-          <p>Select a JSON file containing your IMP Library data and click the button below to import it.</p>
-          <input type="file" accept=".json" id="importFile" style="display: none;">
-          <label for="importFile">
-            <input type="button" value="Select File" onclick="document.getElementById('importFile').click()" style="cursor: pointer;">
-          </label>
-          <input type="button" value="Import" onclick="showImportConfirmation()">
-        `;
-        const removeDataPanel = document.createElement('div');
-        removeDataPanel.className = 'remove-data-panel';
-        removeDataPanel.innerHTML = `
-          <h2>Remove Data</h2>
-          <p>Click the button below to remove all content data from the web app (local storage).</p>
-          <input type="button" value="Remove All Data" onclick="showRemoveDataConfirmation()" class="remove-data-button">
-        `;
-        settingsPanel.appendChild(exportPanel);
-        settingsPanel.appendChild(importPanel);
-        settingsPanel.appendChild(removeDataPanel);
+      function removeAllData() {
+        localStorage.removeItem('music');
+        localStorage.removeItem('video');
+        localStorage.removeItem('radio');
+        localStorage.removeItem('tv');
+        localStorage.removeItem('web');
+        const activeMenuItem = navigationMenu.querySelector('li.active');
+        const activeType = activeMenuItem.querySelector('a').dataset.type;
+        renderPanelContent(activeType);
       }
-    }
-
-    // Render the add content form
-    function renderAddContentForm() {
-      const form = document.createElement('form');
-      form.className = 'add-content-form';
-
-      const titleLabel = document.createElement('label');
-      titleLabel.textContent = 'Title';
-      const titleInput = document.createElement('input');
-      titleInput.type = 'text';
-      titleInput.id = 'titleInput';
-      form.appendChild(titleLabel);
-      form.appendChild(titleInput);
-
-      const urlLabel = document.createElement('label');
-      urlLabel.textContent = 'URL';
-      const urlInput = document.createElement('input');
-      urlInput.type = 'text';
-      urlInput.id = 'urlInput';
-      form.appendChild(urlLabel);
-      form.appendChild(urlInput);
-
-      const typeLabel = document.createElement('label');
-      typeLabel.textContent = 'Type:';
-      const typeSelect = document.createElement('select');
-      typeSelect.id = 'typeSelect';
-
-      const musicOption = document.createElement('option');
-      musicOption.value = 'music';
-      musicOption.textContent = 'Song';
-      typeSelect.appendChild(musicOption);
-
-      const videoOption = document.createElement('option');
-      videoOption.value = 'video';
-      videoOption.textContent = 'Video';
-      typeSelect.appendChild(videoOption);
-
-      const radioOption = document.createElement('option');
-      radioOption.value = 'radio';
-      radioOption.textContent = 'Radio Station';
-      typeSelect.appendChild(radioOption);
-
-      const tvOption = document.createElement('option');
-      tvOption.value = 'tv';
-      tvOption.textContent = 'TV Channel';
-      typeSelect.appendChild(tvOption);
-
-      const webOption = document.createElement('option'); // Add option for the "web" section
-      webOption.value = 'web';
-      webOption.textContent = 'Web';
-      typeSelect.appendChild(webOption);
-
-      form.appendChild(typeLabel);
-      form.appendChild(typeSelect);
-
-      const addButton = document.createElement('input');
-      addButton.type = 'button';
-      addButton.value = 'Save';
-      addButton.addEventListener('click', handleAddContentClick);
-      form.appendChild(addButton);
-
-      panel.appendChild(form);
-    }
-
-    // Create the search input
-    function createSearchInput() {
-      const searchContainer = document.createElement('div');
-      searchContainer.className = 'search-bar';
-
-      const searchInput = document.createElement('input');
-      searchInput.type = 'text';
-      searchInput.placeholder = 'Search';
-      searchInput.addEventListener('input', handleSearchInput);
-      searchContainer.appendChild(searchInput);
-
-      const searchIcon = document.createElement('i');
-      searchIcon.className = 'material-icons search-icon';
-      searchIcon.textContent = 'search';
-      searchContainer.appendChild(searchIcon);
-
-      return searchContainer;
-    }
-
-    // Handle the search input
-    function handleSearchInput(event) {
-      const searchValue = event.target.value;
-      const mediaList = panel.querySelector('.media-list');
-      filterMediaList(mediaList, searchValue);
-    }
-
-    // Filter the media list based on the search value
-    function filterMediaList(list, searchValue) {
-      const items = list.querySelectorAll('.list-item');
-      items.forEach(item => {
-        const title = item.textContent.toLowerCase();
-        if (title.includes(searchValue.toLowerCase())) {
-          item.style.display = 'block';
-        } else {
-          item.style.display = 'none';
+      
+      function confirmDeleteMedia(media, index, type) {
+        if (confirm('Are you sure you want to delete this media?')) {
+          deleteMedia(media, index, type);
         }
-      });
-    }
-
-    // Get the media items based on the type
-    function getMediaByType(type) {
-      // Retrieve media list from local storage based on the type
-      const mediaList = localStorage.getItem(type);
-      return mediaList ? JSON.parse(mediaList) : [];
-    }
-
-    // Save the media list to local storage
-    function saveMediaByType(type, mediaList) {
-      localStorage.setItem(type, JSON.stringify(mediaList));
-    }
-
-    // Capitalize the first letter of a string
-    function capitalizeFirstLetter(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-
-    // Trigger a click event on the Add menu item to select it by default
-    const addMenuItem = document.querySelector('a[data-type="add"]');
-    if (addMenuItem) {
-      addMenuItem.click();
-    }
-
-    // Handle add content button click
-    function handleAddContentClick() {
-      const titleInput = document.getElementById('titleInput');
-      const urlInput = document.getElementById('urlInput');
-      const typeSelect = document.getElementById('typeSelect');
-
-      const title = titleInput.value.trim();
-      let url = urlInput.value.trim();
-      const type = typeSelect.value;
-
-      if (title !== '' && url !== '') {
-        // Convert YouTube video URL format
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-          url = convertYouTubeUrl(url);
-        }
-
-        const mediaItem = {
-          title: title,
-          url: url,
-        };
-
-        if (type === 'web') { // Check for the "web" section
-          const webMediaList = getMediaByType(type);
-          webMediaList.push(mediaItem);
-          saveMediaByType(type, webMediaList);
-        } else {
-          const mediaList = getMediaByType(type);
-          mediaList.push(mediaItem);
-          saveMediaByType(type, mediaList);
-        }
-
-        titleInput.value = '';
-        urlInput.value = '';
-
+      }
+      
+      function deleteMedia(media, index, type) {
+        const mediaList = getMediaByType(type);
+        mediaList.splice(index, 1);
+        saveMediaByType(type, mediaList);
         renderPanelContent(type);
-
-        // Update active state of the section icon
-        const navigationItems = navigationMenu.querySelectorAll('li');
-        navigationItems.forEach(item => {
-          item.classList.remove('active');
-        });
-
-        const selectedMenuItem = navigationMenu.querySelector(`[data-type="${type}"]`);
-        selectedMenuItem.closest('li').classList.add('active');
       }
-    }
-
-    // Function to convert YouTube video URL format
-    function convertYouTubeUrl(url) {
-      if (url.includes('youtu.be')) {
-        // Extract the video ID from the share URL
-        const videoId = url.split('/').pop();
-        return `https://www.youtube.com/embed/${videoId}`;
-      } else {
-        const urlObj = new URL(url);
-        const videoId = urlObj.searchParams.get('v');
-        return `https://www.youtube.com/embed/${videoId}`;
-      }
-    }
-
-    function playMedia(media, index, type) {
-      player.innerHTML = ''; // Clear previous media
-
-      if (media.url.includes('youtube.com') || media.url.includes('youtu.be')) {
-        const video = document.createElement('iframe');
-        video.width = '100%';
-        video.height = '100%';
-        video.src = `${media.url}?autoplay=1`;
-        video.frameborder = '0';
-        video.allow = 'autoplay; fullscreen; encrypted-media';
-
-        player.appendChild(video);
-
-        // Listen for the "ended" event to autoplay the next video
-        video.addEventListener('ended', () => {
-          const mediaList = getMediaByType(type);
-          const nextIndex = (index + 1) % mediaList.length;
-          const nextMedia = mediaList[nextIndex];
-          playMedia(nextMedia, nextIndex, type);
-        });
-      } else if (media.url.endsWith('.m3u8')) {
-        // HLS stream
-        const video = document.createElement('video');
-        video.controls = true;
-        video.autoplay = true;
-        video.style.maxWidth = '100%';
-        video.style.maxHeight = '100%';
-
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(media.url);
-          hls.attachMedia(video);
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          video.src = media.url;
-        }
-
-        player.appendChild(video);
-
-        // Listen for the "ended" event to autoplay the next video
-        video.addEventListener('ended', () => {
-          const mediaList = getMediaByType(type);
-          const nextIndex = (index + 1) % mediaList.length;
-          const nextMedia = mediaList[nextIndex];
-          playMedia(nextMedia, nextIndex, type);
-        });
-      } else {
-        // Regular video or audio file
-        const source = document.createElement('source');
-        source.src = media.url;
-
-        const video = document.createElement('video');
-        video.controls = true;
-        video.autoplay = true;
-        video.style.maxWidth = '100%';
-        video.style.maxHeight = '100%';
-        video.appendChild(source);
-
-        player.appendChild(video);
-
-        // Listen for the "ended" event to autoplay the next media
-        video.addEventListener('ended', () => {
-          const mediaList = getMediaByType(type);
-          const nextIndex = (index + 1) % mediaList.length;
-          const nextMedia = mediaList[nextIndex];
-          playMedia(nextMedia, nextIndex, type);
-        });
-      }
-
-      // Update the selected index for the media type
-      selectedIndexes[type] = index;
-
-      // Update the active state of the media list items
-      const mediaListItems = panel.querySelectorAll('ul li');
-      mediaListItems.forEach(item => {
-        item.classList.remove('playing');
-      });
-      mediaListItems[index].classList.add('playing');
-    }
-    
-    // Export data function
-    function exportData() {
-      const exportData = {
-        music: getMediaByType('music'),
-        video: getMediaByType('video'),
-        radio: getMediaByType('radio'),
-        tv: getMediaByType('tv'),
-        web: getMediaByType('web'),
-      };
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-      const exportLink = document.createElement('a');
-      exportLink.setAttribute('href', dataUri);
-      exportLink.setAttribute('download', 'imp-data.json');
-      exportLink.click();
-    }
-    
-    // Show import confirmation dialog
-    function showImportConfirmation() {
-      importButton.setAttribute('type', 'file');
-      importButton.setAttribute('accept', '.json');
-      importButton.style.display = 'none';
-      importButton.addEventListener('change', importData);
-      document.body.appendChild(importButton);
-      importButton.click();
-      document.body.removeChild(importButton);
-    }
-    
-    // Import data function
-    function importData(event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const contents = e.target.result;
-        const importedData = JSON.parse(contents);
-        if (confirm('WARNING: THIS OVERWRITE YOUR EXISTING IMP LIBRARY! Are you sure you want to IMPORT this library data?')) {
-          Object.keys(importedData).forEach(type => {
-            saveMediaByType(type, importedData[type]);
-          });
-          const activeMenuItem = navigationMenu.querySelector('li.active');
-          const activeType = activeMenuItem.querySelector('a').dataset.type;
-          renderPanelContent(activeType);
-        }
-      };
-      reader.readAsText(file);
-    }
-    
-    // Show remove data confirmation dialog
-    function showRemoveDataConfirmation() {
-      if (confirm('WARNING: THIS WILL REMOVE ALL DATA FROM YOUR IMP LIBRARY! This action cannot be undone without a back-up. Are you sure you want to REMOVE ALL DATA?')) {
-        removeAllData();
-      }
-    }
-    
-    // Remove all data function
-    function removeAllData() {
-      Object.keys(selectedIndexes).forEach(type => {
-        localStorage.removeItem(type);
-      });
-      const activeMenuItem = navigationMenu.querySelector('li.active');
-      const activeType = activeMenuItem.querySelector('a').dataset.type;
-      renderPanelContent(activeType);
-    }
-  </script>
-</body>
-
+    </script>
+  </body>
 </html>
