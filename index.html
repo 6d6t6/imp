@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IMP [v3-5BETA]</title>
+  <title>IMP [v3]</title>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="favicon.png" type="image/png">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -675,81 +674,6 @@
         const activeMenuItem = navigationMenu.querySelector('li.active');
         const activeType = activeMenuItem.querySelector('a').dataset.type;
         renderPanelContent(activeType);
-      }
-
-      // Check for URL parameters on page load
-      document.addEventListener('DOMContentLoaded', checkURLParameters);
-
-      function checkURLParameters() {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        const titleParam = urlParams.get('title');
-        const typeParam = urlParams.get('type');
-        const urlParam = urlParams.get('url');
-
-        if (titleParam && typeParam && urlParam) {
-          showConfirmationDialog(titleParam, typeParam, urlParam);
-        }
-      }
-
-      function showConfirmationDialog(title, type, url) {
-
-        const dialogContainer = document.createElement('div');
-        dialogContainer.className = 'confirmation-dialog';
-
-        const dialogContent = document.createElement('p');
-        dialogContent.textContent = `Would you like to add "${title}" to your library?`;
-
-        const addButton = document.createElement('input');
-        addButton.type = 'button';
-        addButton.value = 'Add';
-        addButton.addEventListener('click', () => handleAddButtonClick(title, type, url));
-
-        const cancelButton = document.createElement('input');
-        cancelButton.type = 'button';
-        cancelButton.value = 'Cancel';
-        cancelButton.addEventListener('click', hideConfirmationDialog);
-
-        dialogContainer.appendChild(dialogContent);
-        dialogContainer.appendChild(addButton);
-        dialogContainer.appendChild(cancelButton);
-
-        document.body.appendChild(dialogContainer);
-
-        document.addEventListener('click', (event) => {
-          if (!dialogContainer.contains(event.target)) {
-            hideConfirmationDialog();
-          }
-        });
-      }
-
-      function hideConfirmationDialog() {
-        const dialogContainer = document.querySelector('.confirmation-dialog');
-        if (dialogContainer) {
-          dialogContainer.remove();
-        }
-      }
-
-      function handleAddButtonClick(title, type, url) {
-        // Remove the dialog
-        hideConfirmationDialog();
-
-        const mediaItem = {
-          title: title,
-          url: url,
-        };
-
-        if (type === 'web') {
-          const webMediaList = getMediaByType(type);
-          webMediaList.push(mediaItem);
-          saveMediaByType(type, webMediaList);
-        } else {
-          const mediaList = getMediaByType(type);
-          mediaList.push(mediaItem);
-          saveMediaByType(type, mediaList);
-        }
-
-        renderPanelContent(type);
       }
     </script>
   </body>
