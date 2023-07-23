@@ -617,6 +617,45 @@
         mediaListItems[index].classList.add('playing');
       }
       
+        // Get reference to sorted media array
+        const media = getSortedMediaArray();
+
+        function playNext() {
+
+          // Find index of current media in sorted array
+          const currentIndex = media.findIndex(item => item.url === currentMediaUrl);
+
+          // Increment index and handle wrap around
+          let nextIndex = currentIndex + 1;
+          if (nextIndex >= media.length) {
+            nextIndex = 0; 
+          }
+
+          // Play next media item
+          const nextMedia = media[nextIndex];
+          playMedia(nextMedia);
+
+        }
+
+        function getSortedMediaArray() {
+
+          // Sort media array alphabetically
+          const sortedMedia = media.slice().sort((a, b) => {
+            const titleA = a.title.toUpperCase();
+            const titleB = b.title.toUpperCase();
+            if (titleA < titleB) {
+              return -1;
+            }
+            if (titleA > titleB) {
+              return 1;
+            }
+            return 0;
+          });
+
+          return sortedMedia;
+
+        }
+
       function exportData() {
         const exportData = {
           music: getMediaByType('music'),
