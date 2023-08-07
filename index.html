@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMP [v3]</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend+Deca&display=swap" rel="stylesheet">
+  <meta property="og:title" content="IMP: Internet Media Player">
+  <meta property="og:description" content="Play your favorite internet media.">
+  <meta property="og:image" content="https://6d6t6.github.io/imp/favicon.png">
+  <meta property="og:url" content="https://6d6t6.github.io/imp">
+  <meta property="og:type" content="website">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+      color: #808080;
+      background-color: #080808;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .navigation-bar {
+      background-color: #080808;
+      width: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+    }
+
+    .navigation-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .navigation-menu li {
+      margin-bottom: 20px;
+    }
+
+    .navigation-menu a {
+      color: #606060;
+      text-decoration: none;
+    }
+
+    .navigation-menu li.active a {
+      color: #ffffff;
+    }
+
+    .panel {
+      flex: 1;
+      padding: 20px;
+      background-color: #101010;
+      overflow-y: auto;
+    }
+
+    .player {
+      flex: 2;
+      background-color: #000000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      padding: 20px;
+      position: relative;
+    }
+
+    .player video {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
+    .panel.hidden {
+      display: none;
+    }
+
+    .player.expanded {
+      flex: 3;
+    }
+
+    .add-content-form {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 20px;
+    }
+
+    .add-content-form label {
+      margin-bottom: 5px;
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: small;
+    }
+
+    .add-content-form input[type="text"] {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #303030;
+      color: #ffffff;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+    }
+
+    .add-content-form input[type="button"] {
+      background-color: #e93f38;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-block-start: 20px;
+      text-transform: uppercase;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+    }
+
+    .no-content-message {
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .panel ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .panel ul li {
+      margin-bottom: 10px;
+      color: #808080;
+      cursor: pointer;
+    }
+
+    .panel ul li.playing {
+      color: #ffffff;
+    }
+
+    h2 {
+      margin-block-start: -4px;
+    }
+
+    select#typeSelect {
+      padding: 10px;
+      border-radius: 6px;
+      background: #303030;
+      border: none;
+      color: #ffffff;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+    }
+
+    iframe {
+      border: none;
+      border-radius: 6px;
+    }
+
+    video {
+      border-radius: 6px;
+    }
+
+    .player-controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .player-controls button {
+      background: none;
+      border: none;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 24px;
+      margin: 0 5px;
+    }
+
+    .player-controls button:disabled {
+      color: #808080;
+      cursor: not-allowed;
+    }
+
+    .search-bar {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input[type="text"] {
+      margin-bottom: 0px;
+      padding: 10px 10px 10px 40px;
+      border-radius: 8px;
+      border: none;
+      background: #303030;
+      color: #ffffff;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+      width: calc(100% - 50px);
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+      color: #808080;
+    }
+
+    .remove-data-button {
+      margin-top: 0;
+    }
+    
+    input[type="button"] {
+      background-color: #e93f38;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      text-transform: uppercase;
+      font-family: 'Lexend Deca', Arial, sans-serif;
+    }
+  </style>
+</head>
+  <body>
+    <div class="container">
+      <nav class="navigation-bar">
+        <ul class="navigation-menu">
+          <li><a href="#" data-type="music"><i class="material-icons">music_note</i></a></li>
+          <li><a href="#" data-type="video"><i class="material-icons">theaters</i></a></li>
+          <li><a href="#" data-type="radio"><i class="material-icons">radio</i></a></li>
+          <li><a href="#" data-type="tv"><i class="material-icons">tv</i></a></li>
+          <li><a href="#" data-type="web"><i class="material-icons">language</i></a></li>
+          <li><a href="#" data-type="add" class="active"><i class="material-icons">add_circle</i></a></li>
+          <li><a href="#" data-type="settings"><i class="material-icons">settings</i></a></li>
+        </ul>
+      </nav>
+
+      <div class="panel">
+        <!-- panel content -->
+      </div>
+
+      <div class="player">
+        <!-- player content -->
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+      // DOM elements
+      const navigationMenu = document.querySelector('.navigation-menu');
+      const panel = document.querySelector('.panel');
+      const player = document.querySelector('.player');
+      const exportButton = document.createElement('input');
+      const importButton = document.createElement('input');
+      const removeDataButton = document.createElement('input');
+      
+      const selectedIndexes = {
+        music: 0,
+        video: 0,
+        radio: 0,
+        tv: 0,
+        web: 0,
+      };
+
+      // Event listeners
+      navigationMenu.addEventListener('click', handleNavigationMenuClick);
+
+      function handleNavigationMenuClick(event) {
+        event.preventDefault();
+        const target = event.target.closest('li');
+        if (target) {
+          navigationMenu.querySelectorAll('li').forEach(item => {
+            item.classList.remove('active');
+          });
+          target.classList.add('active');
+          const selectedMenuItem = target.querySelector('a');
+          const selectedType = selectedMenuItem.dataset.type;
+          renderPanelContent(selectedType);
+
+          panel.classList.remove('hidden');
+          player.classList.remove('expanded');
+        }
+      }
+
+      function renderPanelContent(type) {
+        panel.innerHTML = '';
+
+        const header = document.createElement('h2');
+        header.textContent = capitalizeFirstLetter(type);
+        panel.appendChild(header);
+
+        if (type === 'add') {
+          renderAddContentForm();
+        } else {
+          const media = getMediaByType(type);
+          if (media.length > 0) {
+            const searchInput = createSearchInput();
+            panel.appendChild(searchInput);
+
+            const ul = document.createElement('ul');
+            ul.classList.add('media-list');
+            media.sort((a, b) => a.title.localeCompare(b.title));
+            media.forEach((item, index) => {
+              const li = document.createElement('li');
+              li.textContent = item.title;
+              li.classList.add('list-item');
+              if (index === selectedIndexes[type]) {
+                li.classList.add('playing');
+              }
+              li.addEventListener('click', () => playMedia(item, index, type));
+              ul.appendChild(li);
+            });
+            panel.appendChild(ul);
+
+            const mediaList = panel.querySelector('.media-list');
+            const searchInputField = panel.querySelector('.search-bar input[type="text"]');
+            searchInputField.addEventListener('input', () => {
+              filterMediaList(mediaList, searchInputField.value);
+            });
+          } else {
+            if (type !== 'settings') {
+              const message = document.createElement('p');
+              message.className = 'no-content-message';
+              message.textContent = 'No content available.';
+              panel.appendChild(message);
+            }
+          }
+        }
+        
+        if (type === 'settings') {
+          const settingsPanel = document.querySelector('.panel');
+          const exportPanel = document.createElement('div');
+          exportPanel.className = 'export-panel';
+          exportPanel.innerHTML = `
+            <h3>Export Library</h3>
+            <p>Click the button below to export your IMP Library data.</p>
+            <input type="button" value="Export" onclick="exportData()">
+          `;
+          const importPanel = document.createElement('div');
+          importPanel.className = 'import-panel';
+          importPanel.innerHTML = `
+            <h3>Import Library</h3>
+            <p>Click the button below to import a JSON file containing your IMP Library data. This will replace your current library.</p>
+            <input type="file" accept=".json" id="importFile" style="display: none;">
+            <input type="button" value="Import" onclick="showImportConfirmation()">
+          `;
+          const removeDataPanel = document.createElement('div');
+          removeDataPanel.className = 'remove-data-panel';
+          removeDataPanel.innerHTML = `
+            <h3>Delete Library</h3>
+            <p>Click the button below to remove all library data from IMP (clears local storage).</p>
+            <input type="button" value="Remove All Data" onclick="showRemoveDataConfirmation()" class="remove-data-button">
+          `;
+          settingsPanel.appendChild(exportPanel);
+          settingsPanel.appendChild(importPanel);
+          settingsPanel.appendChild(removeDataPanel);
+        }
+      }
+
+      function renderAddContentForm() {
+        const form = document.createElement('form');
+        form.className = 'add-content-form';
+
+        const titleLabel = document.createElement('label');
+        titleLabel.textContent = 'Title';
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.id = 'titleInput';
+        form.appendChild(titleLabel);
+        form.appendChild(titleInput);
+
+        const urlLabel = document.createElement('label');
+        urlLabel.textContent = 'URL';
+        const urlInput = document.createElement('input');
+        urlInput.type = 'text';
+        urlInput.id = 'urlInput';
+        form.appendChild(urlLabel);
+        form.appendChild(urlInput);
+
+        const typeLabel = document.createElement('label');
+        typeLabel.textContent = 'Type';
+        const typeSelect = document.createElement('select');
+        typeSelect.id = 'typeSelect';
+
+        const musicOption = document.createElement('option');
+        musicOption.value = 'music';
+        musicOption.textContent = 'Song';
+        typeSelect.appendChild(musicOption);
+
+        const videoOption = document.createElement('option');
+        videoOption.value = 'video';
+        videoOption.textContent = 'Video';
+        typeSelect.appendChild(videoOption);
+
+        const radioOption = document.createElement('option');
+        radioOption.value = 'radio';
+        radioOption.textContent = 'Radio Station';
+        typeSelect.appendChild(radioOption);
+
+        const tvOption = document.createElement('option');
+        tvOption.value = 'tv';
+        tvOption.textContent = 'TV Channel';
+        typeSelect.appendChild(tvOption);
+
+        const webOption = document.createElement('option');
+        webOption.value = 'web';
+        webOption.textContent = 'Web (YouTube)';
+        typeSelect.appendChild(webOption);
+
+        form.appendChild(typeLabel);
+        form.appendChild(typeSelect);
+
+        const addButton = document.createElement('input');
+        addButton.type = 'button';
+        addButton.value = 'Save';
+        addButton.addEventListener('click', handleAddContentClick);
+        form.appendChild(addButton);
+
+        panel.appendChild(form);
+      }
+
+      function createSearchInput() {
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'search-bar';
+
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Search';
+        searchInput.addEventListener('input', handleSearchInput);
+        searchContainer.appendChild(searchInput);
+
+        const searchIcon = document.createElement('i');
+        searchIcon.className = 'material-icons search-icon';
+        searchIcon.textContent = 'search';
+        searchContainer.appendChild(searchIcon);
+
+        return searchContainer;
+      }
+
+      function handleSearchInput(event) {
+        const searchValue = event.target.value;
+        const mediaList = panel.querySelector('.media-list');
+        filterMediaList(mediaList, searchValue);
+      }
+
+      function filterMediaList(list, searchValue) {
+        const items = list.querySelectorAll('.list-item');
+        items.forEach(item => {
+          const title = item.textContent.toLowerCase();
+          if (title.includes(searchValue.toLowerCase())) {
+            item.style.display = 'block';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      }
+
+      function getMediaByType(type) {
+        const mediaList = localStorage.getItem(type);
+        return mediaList ? JSON.parse(mediaList) : [];
+      }
+
+      function saveMediaByType(type, mediaList) {
+        localStorage.setItem(type, JSON.stringify(mediaList));
+      }
+
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      const addMenuItem = document.querySelector('a[data-type="add"]');
+      if (addMenuItem) {
+        addMenuItem.click();
+      }
+
+      function handleAddContentClick() {
+        const titleInput = document.getElementById('titleInput');
+        const urlInput = document.getElementById('urlInput');
+        const typeSelect = document.getElementById('typeSelect');
+
+        const title = titleInput.value.trim();
+        let url = urlInput.value.trim();
+        const type = typeSelect.value;
+
+        if (title !== '' && url !== '') {
+          if (url.includes('youtube.com') || url.includes('youtu.be')) {
+            url = convertYouTubeUrl(url);
+          }
+
+          const mediaItem = {
+            title: title,
+            url: url,
+          };
+
+          if (type === 'web') {
+            const webMediaList = getMediaByType(type);
+            webMediaList.push(mediaItem);
+            saveMediaByType(type, webMediaList);
+          } else {
+            const mediaList = getMediaByType(type);
+            mediaList.push(mediaItem);
+            saveMediaByType(type, mediaList);
+          }
+
+          titleInput.value = '';
+          urlInput.value = '';
+
+          renderPanelContent(type);
+
+          const navigationItems = navigationMenu.querySelectorAll('li');
+          navigationItems.forEach(item => {
+            item.classList.remove('active');
+          });
+
+          const selectedMenuItem = navigationMenu.querySelector(`[data-type="${type}"]`);
+          selectedMenuItem.closest('li').classList.add('active');
+        }
+      }
+
+      function convertYouTubeUrl(url) {
+        if (url.includes('youtu.be')) {
+          const videoId = url.split('/').pop();
+          return `https://www.youtube.com/embed/${videoId}`;
+        } else {
+          const urlObj = new URL(url);
+          const videoId = urlObj.searchParams.get('v');
+          return `https://www.youtube.com/embed/${videoId}`;
+        }
+      }
+
+      function playMedia(media, index, type) {
+        player.innerHTML = '';
+
+        if (media.url.includes('youtube.com') || media.url.includes('youtu.be')) {
+          const video = document.createElement('iframe');
+          video.width = '100%';
+          video.height = '100%';
+          video.src = `${media.url}?autoplay=1`;
+          video.frameborder = '0';
+          video.allow = 'autoplay; fullscreen; encrypted-media';
+
+          player.appendChild(video);
+
+          video.addEventListener('ended', () => {
+            const mediaList = getMediaByType(type);
+            const nextIndex = (index + 1) % mediaList.length;
+            const nextMedia = mediaList[nextIndex];
+            playMedia(nextMedia, nextIndex, type);
+          });
+        } else if (media.url.endsWith('.m3u8')) {
+          // HLS stream
+          const video = document.createElement('video');
+          video.controls = true;
+          video.autoplay = true;
+          video.style.maxWidth = '100%';
+          video.style.maxHeight = '100%';
+
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(media.url);
+            hls.attachMedia(video);
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = media.url;
+          }
+
+          player.appendChild(video);
+
+          // Listen for the "ended" event to autoplay the next video
+          video.addEventListener('ended', () => {
+            const mediaList = getMediaByType(type);
+            const nextIndex = (index + 1) % mediaList.length;
+            const nextMedia = mediaList[nextIndex];
+            playMedia(nextMedia, nextIndex, type);
+          });
+        } else {
+          // Regular video or audio file
+          const source = document.createElement('source');
+          source.src = media.url;
+
+          const video = document.createElement('video');
+          video.controls = true;
+          video.autoplay = true;
+          video.style.maxWidth = '100%';
+          video.style.maxHeight = '100%';
+          video.appendChild(source);
+
+          player.appendChild(video);
+
+          // Listen for the "ended" event to autoplay the next media
+          video.addEventListener('ended', () => {
+            const mediaList = getMediaByType(type);
+            const nextIndex = (index + 1) % mediaList.length;
+            const nextMedia = mediaList[nextIndex];
+            playMedia(nextMedia, nextIndex, type);
+          });
+        }
+
+        selectedIndexes[type] = index;
+
+        const mediaListItems = panel.querySelectorAll('ul li');
+        mediaListItems.forEach(item => {
+          item.classList.remove('playing');
+        });
+        mediaListItems[index].classList.add('playing');
+      }
+      
+        // Get reference to sorted media array
+        const media = getSortedMediaArray();
+
+        function playNext() {
+
+          // Find index of current media in sorted array
+          const currentIndex = media.findIndex(item => item.url === currentMediaUrl);
+
+          // Increment index and handle wrap around
+          let nextIndex = currentIndex + 1;
+          if (nextIndex >= media.length) {
+            nextIndex = 0; 
+          }
+
+          // Play next media item
+          const nextMedia = media[nextIndex];
+          playMedia(nextMedia);
+
+        }
+
+        function getSortedMediaArray() {
+
+          // Sort media array alphabetically
+          const sortedMedia = media.slice().sort((a, b) => {
+            const titleA = a.title.toUpperCase();
+            const titleB = b.title.toUpperCase();
+            if (titleA < titleB) {
+              return -1;
+            }
+            if (titleA > titleB) {
+              return 1;
+            }
+            return 0;
+          });
+
+          return sortedMedia;
+
+        }
+
+      function exportData() {
+        const exportData = {
+          music: getMediaByType('music'),
+          video: getMediaByType('video'),
+          radio: getMediaByType('radio'),
+          tv: getMediaByType('tv'),
+          web: getMediaByType('web'),
+        };
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const exportLink = document.createElement('a');
+        exportLink.setAttribute('href', dataUri);
+        exportLink.setAttribute('download', 'imp-data.json');
+        exportLink.click();
+      }
+      
+      function showImportConfirmation() {
+        importButton.setAttribute('type', 'file');
+        importButton.setAttribute('accept', '.json');
+        importButton.style.display = 'none';
+        importButton.addEventListener('change', importData);
+        document.body.appendChild(importButton);
+        importButton.click();
+        document.body.removeChild(importButton);
+      }
+      
+      function importData(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const contents = e.target.result;
+          const importedData = JSON.parse(contents);
+          if (confirm('WARNING: THIS OVERWRITE YOUR EXISTING IMP LIBRARY! Are you sure you want to IMPORT this library data?')) {
+            Object.keys(importedData).forEach(type => {
+              saveMediaByType(type, importedData[type]);
+            });
+            const activeMenuItem = navigationMenu.querySelector('li.active');
+            const activeType = activeMenuItem.querySelector('a').dataset.type;
+            renderPanelContent(activeType);
+          }
+        };
+        reader.readAsText(file);
+      }
+      
+      function showRemoveDataConfirmation() {
+        if (confirm('WARNING: THIS WILL REMOVE ALL DATA FROM YOUR IMP LIBRARY! This action cannot be undone without a back-up. Are you sure you want to REMOVE ALL DATA?')) {
+          removeAllData();
+        }
+      }
+      
+      function removeAllData() {
+        Object.keys(selectedIndexes).forEach(type => {
+          localStorage.removeItem(type);
+        });
+        const activeMenuItem = navigationMenu.querySelector('li.active');
+        const activeType = activeMenuItem.querySelector('a').dataset.type;
+        renderPanelContent(activeType);
+      }
+    </script>
+  </body>
+</html>
